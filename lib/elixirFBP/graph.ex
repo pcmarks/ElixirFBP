@@ -22,7 +22,7 @@ defmodule ElixirFBP.Graph do
     library: nil,
     main: false,
     description: "",
-    digraph: nil
+    graph: nil
   ]
   @type t :: %ElixirFBP.Graph{id: String.t, name: String.t}
   use GenServer
@@ -34,9 +34,9 @@ defmodule ElixirFBP.Graph do
   """
   def start_link(id \\ nil, name \\ "", library \\ nil,
                  main \\ false, description \\ "") do
-    digraph = :digraph.new()
+    graph = :digraph.new([:protected])
     fbp_graph = %ElixirFBP.Graph{id: id, name: name, library: library,
-          main: main, description: description, digraph: digraph}
+          main: main, description: description, graph: graph}
     GenServer.start_link(__MODULE__, fbp_graph, name: __MODULE__)
   end
 
@@ -64,20 +64,22 @@ defmodule ElixirFBP.Graph do
   ########################################################################
   # The GenServer implementation
   @doc """
-  Return the digraph in this FBP Graph
+  Return the FBP Graph structure
   """
   def handle_call(:get_graph, _requester, fbp_graph) do
-    {:reply, fbp_graph.graph, fbp_graph}
+    {:reply, fbp_graph, fbp_graph}
   end
 
   @doc """
-  A request to clear the FBP Graph
+  A request to clear the FBP Graph. Clearing is accomplished by
+  deleting all the vertices and all the edges.
   """
   def handle_call(:clear, _requester, fbp_graph) do
-    :digraph.delete(fbp_graph.graph)
-    digraph = :digraph.new()
-    new_fbp_graph = %{fbp_graph | digraph: digraph}
-    {:reply, nil, new_fbp_graph }
+    g = fbp_graph.graph
+    vs = :digraph.vertices(g)
+    es = :digraph.edges(g)
+    :digraph.del_vertices(g, vs)
+    {:reply, nil, fbp_graph}
   end
 
   def handle_cast(message, fbp_graph) do
