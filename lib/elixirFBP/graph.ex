@@ -22,7 +22,7 @@ defmodule ElixirFBP.Graph do
     library: nil,
     main: false,
     description: "",
-    graph: nil
+    digraph: nil
   ]
   @type t :: %ElixirFBP.Graph{id: String.t, name: String.t}
   use GenServer
@@ -34,17 +34,17 @@ defmodule ElixirFBP.Graph do
   """
   def start_link(id \\ nil, name \\ "", library \\ nil,
                  main \\ false, description \\ "") do
-    graph = :digraph.new([:protected])
+    digraph = :digraph.new([:protected])
     fbp_graph = %ElixirFBP.Graph{id: id, name: name, library: library,
-          main: main, description: description, graph: graph}
+          main: main, description: description, digraph: digraph}
     GenServer.start_link(__MODULE__, fbp_graph, name: __MODULE__)
   end
 
   @doc """
-  Retreive the digraph from the FBP Graph - primarily for testing/debugging
+  Retreive the FBP Graph - primarily for testing/debugging
   """
-  def get_graph do
-    GenServer.call(__MODULE__, :get_graph)
+  def get do
+    GenServer.call(__MODULE__, :get)
   end
 
   @doc """
@@ -66,7 +66,7 @@ defmodule ElixirFBP.Graph do
   @doc """
   Return the FBP Graph structure
   """
-  def handle_call(:get_graph, _requester, fbp_graph) do
+  def handle_call(:get, _requester, fbp_graph) do
     {:reply, fbp_graph, fbp_graph}
   end
 
@@ -75,10 +75,11 @@ defmodule ElixirFBP.Graph do
   deleting all the vertices and all the edges.
   """
   def handle_call(:clear, _requester, fbp_graph) do
-    g = fbp_graph.graph
-    vs = :digraph.vertices(g)
-    es = :digraph.edges(g)
-    :digraph.del_vertices(g, vs)
+    digraph = fbp_graph.digraph
+    vertices = :digraph.vertices(digraph)
+    edges = :digraph.edges(digraph)
+    :digraph.del_vertices(digraph, vertices)
+    :digraph.del_edges(digraph, edges)
     {:reply, nil, fbp_graph}
   end
 
