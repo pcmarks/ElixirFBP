@@ -32,11 +32,14 @@ defmodule ElixirFBP.Graph do
   @doc """
   Starts things off with the creation of the state.
   """
-  def start_link(id \\ nil, name \\ "", library \\ nil,
-                 main \\ false, description \\ "") do
+  def start_link(id, parameters \\ %{}) do
     digraph = :digraph.new([:protected])
-    fbp_graph = %ElixirFBP.Graph{id: id, name: name, library: library,
-          main: main, description: description, digraph: digraph}
+    fbp_graph = %ElixirFBP.Graph{id: id,
+                                 name: parameters[:name],
+                                 library: parameters[:library],
+                                 main: parameters[:main],
+                                 description: parameters[:description],
+                                 digraph: digraph}
     GenServer.start_link(__MODULE__, fbp_graph, name: __MODULE__)
   end
 
@@ -48,10 +51,14 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Clear/empty the current FBP Graph.
+  Clear/empty the current FBP Graph. Reset the metadata.
   """
-  def clear do
-    GenServer.call(__MODULE__, :clear)
+  def clear(id, parameters \\ %{}) do
+    GenServer.call(__MODULE__, {:clear, id,
+                                parameters[:name],
+                                parameters[:library],
+                                parameters[:main],
+                                parameters[:description]})
   end
 
   @doc """
@@ -74,13 +81,16 @@ defmodule ElixirFBP.Graph do
   A request to clear the FBP Graph. Clearing is accomplished by
   deleting all the vertices and all the edges.
   """
-  def handle_call(:clear, _requester, fbp_graph) do
+  def handle_call({:clear, id, name, library, main, description},
+                    _requester, fbp_graph) do
     digraph = fbp_graph.digraph
     vertices = :digraph.vertices(digraph)
     edges = :digraph.edges(digraph)
     :digraph.del_vertices(digraph, vertices)
     :digraph.del_edges(digraph, edges)
-    {:reply, nil, fbp_graph}
+    new_fbp_graph = %ElixirFBP.Graph{id: id, name: name, library: library,
+          main: main, description: description, digraph: digraph}
+    {:reply, nil, new_fbp_graph}
   end
 
   def handle_cast(message, fbp_graph) do
