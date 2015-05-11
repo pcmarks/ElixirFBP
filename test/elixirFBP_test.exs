@@ -26,8 +26,29 @@ defmodule ElixirFBPTest do
 
   test "Add a node" do
     {:ok, _} = ElixirFBP.Graph.start_link(33)
-    ElixirFBP.Graph.add_node(33, :node1)
+    ElixirFBP.Graph.add_node(33, :node1, "Math.Add")
     nodes = ElixirFBP.Graph.nodes
     assert :node1 in nodes == true
   end
+
+  test "Remove a node" do
+    {:ok, _} = ElixirFBP.Graph.start_link(33)
+    ElixirFBP.Graph.add_node(33, :node1, "Math.Add")
+    result = ElixirFBP.Graph.remove_node(33, :node1)
+    assert result == true
+    nodes = ElixirFBP.Graph.nodes
+    assert :node1 in nodes == false
+  end
+
+  test "Add an edge between two nodes" do
+    {:ok, _} = ElixirFBP.Graph.start_link(33)
+    ElixirFBP.Graph.add_node(33, :node1, "Math.Add")
+    ElixirFBP.Graph.add_node(33, :node2, "Math.Subtract")
+    edge = ElixirFBP.Graph.add_edge(33, %{node_id: :node1}, %{node_id: :node2})
+    fbp_graph = ElixirFBP.Graph.get
+    edge1 = :digraph.edge(fbp_graph.graph, edge)
+    assert elem(edge1, 1) == :node1
+    assert elem(edge1, 2) == :node2
+  end
+
 end

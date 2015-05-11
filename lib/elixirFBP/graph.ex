@@ -14,6 +14,8 @@ defmodule ElixirFBP.Graph do
   for the details.
 
   TODO: Provide support for Port and Group maintenance.
+  TODO: Use secret parameter
+  TODO: Handle :digraph errors
 
   """
   defstruct [
@@ -64,8 +66,22 @@ defmodule ElixirFBP.Graph do
   @doc """
   Add a node to the FBP Graph
   """
-  def add_node(graph_id, node) do
-    GenServer.call(__MODULE__, {:add_node, graph_id, node})
+  def add_node(graph_id, node_id, component, metadata \\ %{}) do
+    GenServer.call(__MODULE__, {:add_node, graph_id, node_id, component, metadata})
+  end
+
+  @doc """
+  Remove a node from the FBP Graph
+  """
+  def remove_node(graph_id, node_id) do
+    GenServer.call(__MODULE__, {:remove_node, graph_id, node_id})
+  end
+
+  @doc """
+  Add an edge to the FBP Graph
+  """
+  def add_edge(graph_id, src, tgt, metadata \\ %{}) do
+    GenServer.call(__MODULE__, {:add_edge, graph_id, src, tgt, metadata})
   end
 
   ########################################################################
@@ -115,8 +131,20 @@ defmodule ElixirFBP.Graph do
     {:reply, nil, new_fbp_graph}
   end
 
-  def handle_call({:add_node, graph_id, node}, _requester, fbp_graph) do
-    :digraph.add_vertex(fbp_graph.graph, node)
-    {:reply, nil, fbp_graph}
+  def handle_call({:add_node, graph_id, node_id, component, metadata}, _requester, fbp_graph) do
+    new_node = :digraph.add_vertex(fbp_graph.graph, node_id, [component, metadata])
+    {:reply, new_node, fbp_graph}
+  end
+
+  def handle_call({:remove_node, graph_id, node_id}, _requester, fbp_graph) do
+    result = :digraph.del_vertex(fbp_graph.graph, node_id)
+    {:reply, result, fbp_graph}
+  end
+
+  def handle_call({:add_edge, graph_id, src, tgt, metadata}, _requester, fbp_graph) do
+    src_node_id = src.node_id
+    tgt_node_id = tgt.node_id
+    new_edge = :digraph.add_edge(fbp_graph.graph, src_node_id, tgt_node_id, [metadata])
+    {:reply, new_edge, fbp_graph}
   end
 end
