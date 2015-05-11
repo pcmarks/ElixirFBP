@@ -22,7 +22,7 @@ defmodule ElixirFBP.Graph do
     library: nil,
     main: false,
     description: "",
-    digraph: nil
+    graph: nil
   ]
   @type t :: %ElixirFBP.Graph{id: String.t, name: String.t}
   use GenServer
@@ -32,22 +32,22 @@ defmodule ElixirFBP.Graph do
   @doc """
   Starts things off with the creation of the state.
   """
-  def start_link(id, parameters \\ %{}) do
-    digraph = :digraph.new([:protected])
-    fbp_graph = %ElixirFBP.Graph{id: id,
-                                 name: parameters[:name],
-                                 library: parameters[:library],
-                                 main: parameters[:main],
-                                 description: parameters[:description],
-                                 digraph: digraph}
-    GenServer.start_link(__MODULE__, fbp_graph, name: __MODULE__)
+  def start_link(graph_id, parameters \\ %{}) do
+    GenServer.start_link(__MODULE__, [graph_id, parameters], name: __MODULE__)
   end
 
   @doc """
-  Retreive the FBP Graph - primarily for testing/debugging
+  Retreive the FBP Graph structure - primarily for testing/debugging
   """
   def get do
     GenServer.call(__MODULE__, :get)
+  end
+
+  @doc """
+  Return the current list of nodes
+  """
+  def nodes do
+    GenServer.call(__MODULE__, :nodes)
   end
 
   @doc """
@@ -64,12 +64,27 @@ defmodule ElixirFBP.Graph do
   @doc """
   Add a node to the FBP Graph
   """
-  def add_node(pid, node) do
-    GenServer.call(pid, {:add_node, node})
+  def add_node(graph_id, node) do
+    GenServer.call(__MODULE__, {:add_node, graph_id, node})
   end
 
   ########################################################################
   # The GenServer implementation
+
+  @doc """
+  Initialize the FBP Graph Structure which becomes the State
+  """
+  def init([id, parameters]) do
+    graph = :digraph.new([:protected])
+    fbp_graph = %ElixirFBP.Graph{id: id,
+                                 name: parameters[:name],
+                                 library: parameters[:library],
+                                 main: parameters[:main],
+                                 description: parameters[:description],
+                                 graph: graph}
+    {:ok, fbp_graph}
+  end
+
   @doc """
   Return the FBP Graph structure
   """
@@ -78,21 +93,30 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
+  Return the current list of nodes.
+  """
+  def handle_call(:nodes, _requester, fbp_graph) do
+    {:reply, :digraph.vertices(fbp_graph.graph), fbp_graph}
+  end
+
+  @doc """
   A request to clear the FBP Graph. Clearing is accomplished by
   deleting all the vertices and all the edges.
   """
   def handle_call({:clear, id, name, library, main, description},
                     _requester, fbp_graph) do
-    digraph = fbp_graph.digraph
-    vertices = :digraph.vertices(digraph)
-    edges = :digraph.edges(digraph)
-    :digraph.del_vertices(digraph, vertices)
-    :digraph.del_edges(digraph, edges)
+    graph = fbp_graph.graph
+    vertices = :digraph.vertices(graph)
+    edges = :digraph.edges(graph)
+    :digraph.del_vertices(graph, vertices)
+    :digraph.del_edges(graph, edges)
     new_fbp_graph = %ElixirFBP.Graph{id: id, name: name, library: library,
-          main: main, description: description, digraph: digraph}
+          main: main, description: description, graph: graph}
     {:reply, nil, new_fbp_graph}
   end
 
-  def handle_cast(message, fbp_graph) do
+  def handle_call({:add_node, graph_id, node}, _requester, fbp_graph) do
+    :digraph.add_vertex(fbp_graph.graph, node)
+    {:reply, nil, fbp_graph}
   end
 end
