@@ -9,6 +9,15 @@ defmodule ElixirFBP.Graph do
 
   Graphs are implemented using Erlang's digraph library.
 
+  The digraph Label associated with a node (digraph vertex) is
+  [component, inports, outports, metadata] where component is the string name
+  of a component - tentatively: "Module", e.g., "Math.Add". inports
+  and outports are lists of atomic name, initial value pairs, e.g., {:augend, 2}.
+  Initial values can be set using the graph add_initial command.
+
+  The digraph Label associated with an edge is [src.port,, tgt.port, metadata] where src.port
+  and tgt.port are atom values for the component's ports.
+
   Functions supported by this module are based on NoFlo's FBP Network Protocol,
   specifically the graph sub-protocol. See http://noflojs.org/documentation/protocol/
   for the details.
@@ -84,6 +93,13 @@ defmodule ElixirFBP.Graph do
     GenServer.call(__MODULE__, {:add_edge, graph_id, src, tgt, metadata})
   end
 
+  @doc """
+  Place an initial value at the port of a node in the FBP Graph
+  """
+  def add_initial(graph_id, src, tgt, metadata \\ %{}) do
+    GenServer.call(__MODULE__, {:add_initial, graph_id, src, tgt, metadata})
+  end
+
   ########################################################################
   # The GenServer implementation
 
@@ -128,11 +144,14 @@ defmodule ElixirFBP.Graph do
     :digraph.del_edges(graph, edges)
     new_fbp_graph = %ElixirFBP.Graph{id: id, name: name, library: library,
           main: main, description: description, graph: graph}
-    {:reply, nil, new_fbp_graph}
+    {:reply, new_fbp_graph, new_fbp_graph}
   end
 
   def handle_call({:add_node, graph_id, node_id, component, metadata}, _requester, fbp_graph) do
-    new_node = :digraph.add_vertex(fbp_graph.graph, node_id, [component, metadata])
+    inports = elem(Code.eval_string(component <> ".inports"), 0)
+    outports = elem(Code.eval_string(component <> ".outports"), 0)
+    label = %{component: component, inports: inports, outports: outports, metadata: metadata}
+    new_node = :digraph.add_vertex(fbp_graph.graph, node_id, label)
     {:reply, new_node, fbp_graph}
   end
 
@@ -142,9 +161,22 @@ defmodule ElixirFBP.Graph do
   end
 
   def handle_call({:add_edge, graph_id, src, tgt, metadata}, _requester, fbp_graph) do
-    src_node_id = src.node_id
-    tgt_node_id = tgt.node_id
-    new_edge = :digraph.add_edge(fbp_graph.graph, src_node_id, tgt_node_id, [metadata])
+    label = %{src_port: src.port, tgt_port: tgt.port, metadata: metadata}
+    new_edge = :digraph.add_edge(
+                    fbp_graph.graph,
+                    src.node_id,
+                    tgt.node_id,
+                    label)
     {:reply, new_edge, fbp_graph}
   end
+
+  def handle_call({:add_initial, graph_id, src, tgt, metadata}, _requester, fbp_graph) do
+    src_data = src.data
+    node_id = tgt.node_id
+    port = tgt.port
+    {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
+
+    {:reply, src_data, fbp_graph}
+  end
+
 end

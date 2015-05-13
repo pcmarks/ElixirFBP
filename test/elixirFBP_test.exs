@@ -29,6 +29,9 @@ defmodule ElixirFBPTest do
     ElixirFBP.Graph.add_node(33, :node1, "Math.Add")
     nodes = ElixirFBP.Graph.nodes
     assert :node1 in nodes == true
+    fbp_graph = ElixirFBP.Graph.get
+    {node_id, label} = :digraph.vertex(fbp_graph.graph, :node1)
+    assert label.inports == [{:addend, nil}, {:augend, nil}]
   end
 
   test "Remove a node" do
@@ -43,12 +46,24 @@ defmodule ElixirFBPTest do
   test "Add an edge between two nodes" do
     {:ok, _} = ElixirFBP.Graph.start_link(33)
     ElixirFBP.Graph.add_node(33, :node1, "Math.Add")
-    ElixirFBP.Graph.add_node(33, :node2, "Math.Subtract")
-    edge = ElixirFBP.Graph.add_edge(33, %{node_id: :node1}, %{node_id: :node2})
+    ElixirFBP.Graph.add_node(33, :node2, "Math.Add")
+    edge = ElixirFBP.Graph.add_edge(
+                  33,
+                  %{node_id: :node1, port: :sum},
+                  %{node_id: :node2, port: :addend})
     fbp_graph = ElixirFBP.Graph.get
-    edge1 = :digraph.edge(fbp_graph.graph, edge)
-    assert elem(edge1, 1) == :node1
-    assert elem(edge1, 2) == :node2
+    {edge_id, node1, node2, label} = :digraph.edge(fbp_graph.graph, edge)
+    assert node1 == :node1
+    assert node2 == :node2
+    assert label.src_port == :sum
+    assert label.tgt_port == :addend
+  end
+
+  test "Add an initial value to a node port" do
+    {:ok, _} = ElixirFBP.Graph.start_link(33)
+    ElixirFBP.Graph.add_node(33, :node1, "Math.Add")
+    result = ElixirFBP.Graph.add_initial(33, %{data: 27}, %{node_id: :node1, port: :addend})
+    assert result == 27
   end
 
 end
