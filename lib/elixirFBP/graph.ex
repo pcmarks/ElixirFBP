@@ -25,6 +25,7 @@ defmodule ElixirFBP.Graph do
   TODO: Provide support for Port and Group maintenance.
   TODO: Use secret parameter
   TODO: Handle :digraph errors
+  TODO: Metadata needs to be stored somewhere in add_initial()
 
   """
   defstruct [
@@ -40,32 +41,34 @@ defmodule ElixirFBP.Graph do
 
   ########################################################################
   # The External API
+
   @doc """
-  Starts things off with the creation of the state.
+  Starts things off with the creation of the state. Register it with name
+  graph_id.
   """
   def start_link(graph_id, parameters \\ %{}) do
-    GenServer.start_link(__MODULE__, [graph_id, parameters], name: __MODULE__)
+    GenServer.start_link(__MODULE__, [graph_id, parameters], name: graph_id)
   end
 
   @doc """
   Retreive the FBP Graph structure - primarily for testing/debugging
   """
-  def get do
-    GenServer.call(__MODULE__, :get)
+  def get(graph_id) do
+    GenServer.call(graph_id, :get)
   end
 
   @doc """
   Return the current list of nodes
   """
-  def nodes do
-    GenServer.call(__MODULE__, :nodes)
+  def nodes(graph_id) do
+    GenServer.call(graph_id, :nodes)
   end
 
   @doc """
   Clear/empty the current FBP Graph. Reset the metadata.
   """
-  def clear(id, parameters \\ %{}) do
-    GenServer.call(__MODULE__, {:clear, id,
+  def clear(graph_id, parameters \\ %{}) do
+    GenServer.call(graph_id, {:clear,
                                 parameters[:name],
                                 parameters[:library],
                                 parameters[:main],
@@ -76,35 +79,35 @@ defmodule ElixirFBP.Graph do
   Add a node to the FBP Graph
   """
   def add_node(graph_id, node_id, component, metadata \\ %{}) do
-    GenServer.call(__MODULE__, {:add_node, graph_id, node_id, component, metadata})
+    GenServer.call(graph_id, {:add_node, node_id, component, metadata})
   end
 
   @doc """
   Remove a node from the FBP Graph
   """
   def remove_node(graph_id, node_id) do
-    GenServer.call(__MODULE__, {:remove_node, graph_id, node_id})
+    GenServer.call(graph_id, {:remove_node, node_id})
   end
 
   @doc """
   Add an edge to the FBP Graph
   """
   def add_edge(graph_id, src, tgt, metadata \\ %{}) do
-    GenServer.call(__MODULE__, {:add_edge, graph_id, src, tgt, metadata})
+    GenServer.call(graph_id, {:add_edge, src, tgt, metadata})
   end
 
   @doc """
   Remove the edge between the two given node/ports in the FBP Graph
   """
   def remove_edge(graph_id, src, tgt) do
-    GenServer.call(__MODULE__, {:remove_edge, graph_id, src, tgt})
+    GenServer.call(graph_id, {:remove_edge, src, tgt})
   end
 
   @doc """
   Place an initial value at the port of a node in the FBP Graph
   """
   def add_initial(graph_id, src, tgt, metadata \\ %{}) do
-    GenServer.call(__MODULE__, {:add_initial, graph_id, src, tgt, metadata})
+    GenServer.call(graph_id, {:add_initial, src, tgt, metadata})
   end
 
   @doc """
@@ -112,19 +115,19 @@ defmodule ElixirFBP.Graph do
   the value nil.
   """
   def remove_initial(graph_id, tgt) do
-    GenServer.call(__MODULE__, {:remove_initial, graph_id, tgt})
+    GenServer.call(graph_id, {:remove_initial, tgt})
   end
 
   ########################################################################
   # The GenServer implementations
 
   @doc """
-  Callback implementation for ElixirFBP.start_link()
+  Callback implementation for ElixirFBP.Graph.start_link()
   Initialize the FBP Graph Structure which becomes the State
   """
-  def init([id, parameters]) do
+  def init([graph_id, parameters]) do
     graph = :digraph.new([:protected])
-    fbp_graph = %ElixirFBP.Graph{id: id,
+    fbp_graph = %ElixirFBP.Graph{id: graph_id,
                                  name: parameters[:name],
                                  library: parameters[:library],
                                  main: parameters[:main],
@@ -154,14 +157,15 @@ defmodule ElixirFBP.Graph do
   A request to clear the FBP Graph. Clearing is accomplished by
   deleting all the vertices and all the edges.
   """
-  def handle_call({:clear, id, name, library, main, description},
+  def handle_call({:clear, name, library, main, description},
                     _req, fbp_graph) do
     graph = fbp_graph.graph
+    graph_id = fbp_graph.id
     vertices = :digraph.vertices(graph)
     edges = :digraph.edges(graph)
     :digraph.del_vertices(graph, vertices)
     :digraph.del_edges(graph, edges)
-    new_fbp_graph = %ElixirFBP.Graph{id: id, name: name, library: library,
+    new_fbp_graph = %ElixirFBP.Graph{id: graph_id, name: name, library: library,
           main: main, description: description, graph: graph}
     {:reply, new_fbp_graph, new_fbp_graph}
   end
@@ -169,7 +173,7 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation for ElixirFBP.add_node()
   """
-  def handle_call({:add_node, graph_id, node_id, component, metadata}, _req, fbp_graph) do
+  def handle_call({:add_node, node_id, component, metadata}, _req, fbp_graph) do
     inports = elem(Code.eval_string(component <> ".inports"), 0)
     outports = elem(Code.eval_string(component <> ".outports"), 0)
     label = %{component: component, inports: inports, outports: outports, metadata: metadata}
@@ -180,7 +184,7 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation for ElixirFBP.remove_node()
   """
-  def handle_call({:remove_node, graph_id, node_id}, _req, fbp_graph) do
+  def handle_call({:remove_node, node_id}, _req, fbp_graph) do
     result = :digraph.del_vertex(fbp_graph.graph, node_id)
     {:reply, result, fbp_graph}
   end
@@ -188,7 +192,7 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation for ElixirFBP.add_edge()
   """
-  def handle_call({:add_edge, graph_id, src, tgt, metadata}, _req, fbp_graph) do
+  def handle_call({:add_edge, src, tgt, metadata}, _req, fbp_graph) do
     label = %{src_port: src.port, tgt_port: tgt.port, metadata: metadata}
     new_edge = :digraph.add_edge(
                     fbp_graph.graph,
@@ -201,7 +205,7 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation for ElixirFBP.remove_edge()
   """
-  def handle_call({:remove_edge, graph_id, src, tgt}, _req, fbp_graph) do
+  def handle_call({:remove_edge, src, tgt}, _req, fbp_graph) do
     result = :digraph.del_path(fbp_graph.graph, src.node_id, tgt.node_id)
     {:reply, result, fbp_graph}
   end
@@ -209,7 +213,7 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation for ElixirFBP.add_initial()
   """
-  def handle_call({:add_initial, graph_id, src, tgt, metadata}, _req, fbp_graph) do
+  def handle_call({:add_initial, src, tgt, metadata}, _req, fbp_graph) do
     src_data = src.data
     node_id = tgt.node_id
     port = tgt.port
@@ -224,13 +228,13 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation for ElixirFBP.remove_initial()
   """
-  def handle_call({:remove_initial, graph_id, tgt}, _req, fbp_graph) do
+  def handle_call({:remove_initial, tgt}, _req, fbp_graph) do
     node_id = tgt.node_id
     port = tgt.port
     {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
     inports = label.inports
     new_inports = Keyword.put(inports, port, nil)
-    new_label = %{label | :inports => inports}
+    new_label = %{label | :inports => new_inports}
     :digraph.add_vertex(fbp_graph.graph, node_id, new_label)
     {:reply, nil, fbp_graph}
   end
