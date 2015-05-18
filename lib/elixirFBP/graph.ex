@@ -67,6 +67,13 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
+  Return info about a node.
+  """
+  def get_node(graph_id, node_id) do
+    GenServer.call(graph_id, {:get_node, node_id})
+  end
+
+  @doc """
   Return the current list of edges - primarily used for testing/debugging.
   """
   def edges(graph_id) do
@@ -159,6 +166,15 @@ defmodule ElixirFBP.Graph do
   """
   def handle_call(:nodes, _req, fbp_graph) do
     {:reply, :digraph.vertices(fbp_graph.graph), fbp_graph}
+  end
+
+  @doc """
+  Callback implementation of ElixirFBP.Graph.get_node()
+  Returns {vertex, label}
+  """
+  def handle_call({:get_node, node_id}, _req, fbp_graph) do
+    graph = fbp_graph.graph
+    {:reply, :digraph.vertex(graph, node_id), fbp_graph}
   end
 
   @doc """

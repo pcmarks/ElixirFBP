@@ -14,10 +14,13 @@ defmodule ElixirFBP.Network do
 
   """
   defstruct [
-    graph_id: nil,
+    graph_reg_name: nil,
     status: :stopped
   ]
   use GenServer
+
+  alias ElixirFBP.Graph
+  alias ElixirFBP.Component
 
   ########################################################################
   # The External API
@@ -25,8 +28,8 @@ defmodule ElixirFBP.Network do
   @doc """
   Starts things off with the creation of the state.
   """
-  def start_link(fbp_graph_process_name) do
-    GenServer.start_link(__MODULE__, fbp_graph_process_name, name: __MODULE__)
+  def start_link(graph_id) do
+    GenServer.start_link(__MODULE__, graph_id, name: __MODULE__)
   end
 
   @doc """
@@ -64,8 +67,8 @@ defmodule ElixirFBP.Network do
   Callback implementation for ElixirFBP.Network.start_link()
   Initialize the state with an FBP graph.
   """
-  def init(fbp_graph_process_name) do
-    {:ok, %ElixirFBP.Network{graph_id: fbp_graph_process_name}}
+  def init(graph_id) do
+    {:ok, %ElixirFBP.Network{graph_reg_name: String.to_atom(graph_id)}}
   end
 
   @doc """
@@ -76,8 +79,11 @@ defmodule ElixirFBP.Network do
 
   """
   def handle_cast(:start, network) do
-    nodes = ElixirFBP.Graph.nodes(network.graph_id)
-    Enum.each(nodes, fn (node) -> start_node(node) end)
+    graph_reg_name = network.graph_reg_name
+    nodes = Graph.nodes(graph_reg_name)
+    Enum.each(nodes, fn (node) ->
+      {node_id, label} = Graph.get_node(graph_reg_name, node)
+      Component.start(graph_reg_name, node_id, label.component) end)
     new_network = %{network | :status => :started}
     {:noreply, new_network}
   end
@@ -85,8 +91,14 @@ defmodule ElixirFBP.Network do
   @doc """
   Callback implementation for ElixirFBP.Network.stop()
   Stop the currently running graph.
+  Unregister all of the node processes.
   """
   def handle_cast(:stop, network) do
+    graph_reg_name = network.graph_reg_name
+    nodes = Graph.nodes(graph_reg_name)
+    Enum.each(nodes, fn(node) ->
+      {node_id, _label} = Graph.get_node(graph_reg_name, node)
+      Component.stop(graph_reg_name, node_id) end)
     new_network = %{network | :status => :stopped}
     {:noreply, new_network}
   end
@@ -95,10 +107,10 @@ defmodule ElixirFBP.Network do
   Callback implementation for ElixirFBP.Network.data
   """
   def handle_cast({:data, graph_id, edge_id, src, tgt, subgraph}, network) do
-    nodes = ElixirFBP.Graph.nodes(network.graph_id)
+    nodes = Graph.nodes(network.graph_reg_name)
     {:noreply, network}
   end
-  
+
   @doc """
   Callback implementation for ElixirFBP.Network.get_status
   """

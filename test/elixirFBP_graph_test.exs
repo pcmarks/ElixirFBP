@@ -7,7 +7,7 @@ defmodule ElixirFBPGraphTest do
   @graph_1 "graph_1"
   @node_1 "node_1"
   @node_2 "node_2"
-  
+
   test "Create and persist a graph with default metadata" do
     {:ok, fbp_graph_process} = Graph.start_link(@graph_1)
     fbp_graph = Graph.get(fbp_graph_process)
@@ -39,6 +39,13 @@ defmodule ElixirFBPGraphTest do
     fbp_graph = Graph.get(fbp_graph_process)
     {_node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
     assert label.inports == [{:addend, nil}, {:augend, nil}]
+  end
+
+  test "Get the info associated with a node" do
+    {:ok, fbp_graph_process} = Graph.start_link(@graph_1)
+    node_id = Graph.add_node(fbp_graph_process, @node_1, "Math.Add")
+    {_node_id, label} = Graph.get_node(fbp_graph_process, node_id)
+    assert label.component == "Math.Add"
   end
 
   test "Remove a node" do
