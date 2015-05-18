@@ -44,14 +44,16 @@ defmodule ElixirFBP.Graph do
 
   @doc """
   Starts things off with the creation of the state. Register it with name
-  graph_id.
+  graph_id - converted to an atom.
   """
   def start_link(graph_id, parameters \\ %{}) do
-    GenServer.start_link(__MODULE__, [graph_id, parameters], name: graph_id)
+    fbp_graph_process_name = String.to_atom(graph_id)
+    GenServer.start_link(__MODULE__, [fbp_graph_process_name, parameters],
+                         name: fbp_graph_process_name)
   end
 
   @doc """
-  Retreive the FBP Graph structure - primarily for testing/debugging
+  Retreive the FBP Graph structure - primarily used for testing/debugging
   """
   def get(graph_id) do
     GenServer.call(graph_id, :get)
@@ -62,6 +64,13 @@ defmodule ElixirFBP.Graph do
   """
   def nodes(graph_id) do
     GenServer.call(graph_id, :nodes)
+  end
+
+  @doc """
+  Return the current list of edges - primarily used for testing/debugging.
+  """
+  def edges(graph_id) do
+    GenServer.call(graph_id, :edges)
   end
 
   @doc """
@@ -125,9 +134,9 @@ defmodule ElixirFBP.Graph do
   Callback implementation for ElixirFBP.Graph.start_link()
   Initialize the FBP Graph Structure which becomes the State
   """
-  def init([graph_id, parameters]) do
+  def init([fbp_graph_process_name, parameters]) do
     graph = :digraph.new([:protected])
-    fbp_graph = %ElixirFBP.Graph{id: graph_id,
+    fbp_graph = %ElixirFBP.Graph{id: fbp_graph_process_name,
                                  name: parameters[:name],
                                  library: parameters[:library],
                                  main: parameters[:main],
@@ -150,6 +159,14 @@ defmodule ElixirFBP.Graph do
   """
   def handle_call(:nodes, _req, fbp_graph) do
     {:reply, :digraph.vertices(fbp_graph.graph), fbp_graph}
+  end
+
+  @doc """
+  Callback implementation of ElixirFBP.edges()
+  Return the current list of edges.
+  """
+  def handle_call(:edges, _req, fbp_graph) do
+    {:reply, :digraph.edges(fbp_graph.graph), fbp_graph}
   end
 
   @doc """
@@ -177,8 +194,8 @@ defmodule ElixirFBP.Graph do
     inports = elem(Code.eval_string(component <> ".inports"), 0)
     outports = elem(Code.eval_string(component <> ".outports"), 0)
     label = %{component: component, inports: inports, outports: outports, metadata: metadata}
-    new_node = :digraph.add_vertex(fbp_graph.graph, node_id, label)
-    {:reply, new_node, fbp_graph}
+    new_vertex = :digraph.add_vertex(fbp_graph.graph, node_id, label)
+    {:reply, new_vertex, fbp_graph}
   end
 
   @doc """

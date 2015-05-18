@@ -17,6 +17,7 @@ defmodule ElixirFBP.Network do
     graph_id: nil,
     status: :stopped
   ]
+  use GenServer
 
   ########################################################################
   # The External API
@@ -24,8 +25,8 @@ defmodule ElixirFBP.Network do
   @doc """
   Starts things off with the creation of the state.
   """
-  def start_link(graph_id) do
-    GenServer.start_link(__MODULE__, graph_id, name: __MODULE__)
+  def start_link(fbp_graph_process_name) do
+    GenServer.start_link(__MODULE__, fbp_graph_process_name, name: __MODULE__)
   end
 
   @doc """
@@ -49,6 +50,13 @@ defmodule ElixirFBP.Network do
     GenServer.call(__MODULE__, :get_status)
   end
 
+  @doc """
+  Data transmission on an edge.
+  """
+  def data(graph_id, edge_id, src, tgt, subgraph \\ nil) do
+    GenServer.cast(__MODULE__, {:data, graph_id, edge_id, src, tgt, subgraph})
+  end
+
   ########################################################################
   # The GenServer implementations
 
@@ -56,8 +64,8 @@ defmodule ElixirFBP.Network do
   Callback implementation for ElixirFBP.Network.start_link()
   Initialize the state with an FBP graph.
   """
-  def init(graph_id) do
-    {:ok, %ElixirFBP.Network{graph_id: graph_id}}
+  def init(fbp_graph_process_name) do
+    {:ok, %ElixirFBP.Network{graph_id: fbp_graph_process_name}}
   end
 
   @doc """
@@ -68,6 +76,8 @@ defmodule ElixirFBP.Network do
 
   """
   def handle_cast(:start, network) do
+    nodes = ElixirFBP.Graph.nodes(network.graph_id)
+    Enum.each(nodes, fn (node) -> start_node(node) end)
     new_network = %{network | :status => :started}
     {:noreply, new_network}
   end
@@ -80,11 +90,25 @@ defmodule ElixirFBP.Network do
     new_network = %{network | :status => :stopped}
     {:noreply, new_network}
   end
+
+  @doc """
+  Callback implementation for ElixirFBP.Network.data
+  """
+  def handle_cast({:data, graph_id, edge_id, src, tgt, subgraph}, network) do
+    nodes = ElixirFBP.Graph.nodes(network.graph_id)
+    {:noreply, network}
+  end
   
   @doc """
   Callback implementation for ElixirFBP.Network.get_status
   """
   def handle_call(:get_status, _req, network) do
     {:reply, network.status, network}
+  end
+
+  defp start_node(node) do
+    component = node.label.component
+    module = Module.concat([component])
+    #spawn_link(component, :s)
   end
 end
