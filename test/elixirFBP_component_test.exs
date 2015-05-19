@@ -14,7 +14,7 @@ defmodule ElixirFBPComponentTest do
     {:ok, _fbp_graph_pid} = Graph.start_link(@graph_1)
     Graph.add_node(@graph_1_name, @node_1, "Math.Add")
     Graph.add_node(@graph_1_name, @node_2, "Math.Add")
-    edge = Graph.add_edge(
+    _edge = Graph.add_edge(
                   @graph_1_name,
                   %{node_id: @node_1, port: :sum},
                   %{node_id: @node_2, port: :addend})

@@ -12,6 +12,8 @@ defmodule ElixirFBP.Network do
   It is assumed that the ElixirFBP.Graph GenServer, which becomes this servers
   state, has been started and registered with its id as its name.
 
+  TODO: Finish implementation of data function
+
   """
   defstruct [
     graph_reg_name: nil,
@@ -26,10 +28,11 @@ defmodule ElixirFBP.Network do
   # The External API
 
   @doc """
-  Starts things off with the creation of the state.
+  Starts things off with the creation of the state. The argument is the FBP
+  Graph registered process name.
   """
-  def start_link(graph_id) do
-    GenServer.start_link(__MODULE__, graph_id, name: __MODULE__)
+  def start_link(fbp_graph_reg_name) do
+    GenServer.start_link(__MODULE__, fbp_graph_reg_name, name: __MODULE__)
   end
 
   @doc """
@@ -67,8 +70,8 @@ defmodule ElixirFBP.Network do
   Callback implementation for ElixirFBP.Network.start_link()
   Initialize the state with an FBP graph.
   """
-  def init(graph_id) do
-    {:ok, %ElixirFBP.Network{graph_reg_name: String.to_atom(graph_id)}}
+  def init(fbp_graph_reg_name) do
+    {:ok, %ElixirFBP.Network{graph_reg_name: fbp_graph_reg_name}}
   end
 
   @doc """

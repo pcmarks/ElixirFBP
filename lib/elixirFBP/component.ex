@@ -18,7 +18,7 @@ defmodule ElixirFBP.Component do
   Return the process name for the spawned process
   """
   def start(graph_reg_name, node_id, component) do
-    IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
+#    IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
     # Retrieve the list of inports and outports for this type of component
     {inports, _} = Code.eval_string(component <> ".inports")
     {_outports, _} = Code.eval_string(component <> ".outports")
@@ -32,8 +32,6 @@ defmodule ElixirFBP.Component do
     module = Module.concat("Elixir", component)
     # We can spawn the component process now, asking it to execute its loop function.
     process_pid = spawn(module, :loop, inport_args ++ outport_args)
-    IO.puts("Component.start alive? = #{inspect Process.alive?(process_pid)}")
-    IO.puts("Component.start where_is = #{inspect Process.whereis(process_name)}")
     Process.register(process_pid, process_name)
     process_name
   end
@@ -45,7 +43,7 @@ defmodule ElixirFBP.Component do
     process_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
     Process.unregister(process_name)
   end
-  
+
   @doc """
   A private function that can assemble the process id and port name that a
   component is connected to. The connection is between an outport and an inport.

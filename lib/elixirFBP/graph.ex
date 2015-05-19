@@ -29,7 +29,7 @@ defmodule ElixirFBP.Graph do
 
   """
   defstruct [
-    id: nil,
+    id: "",
     name: "",
     library: nil,
     main: false,
@@ -43,48 +43,50 @@ defmodule ElixirFBP.Graph do
   # The External API
 
   @doc """
-  Starts things off with the creation of the state. Register it with name
+  Starts things off with the creation of the state. Register it with the name
   graph_id - converted to an atom.
   """
-  def start_link(graph_id, parameters \\ %{}) do
-    fbp_graph_process_name = String.to_atom(graph_id)
-    GenServer.start_link(__MODULE__, [fbp_graph_process_name, parameters],
-                         name: fbp_graph_process_name)
+  def start_link(fbp_graph_id, parameters \\ %{}) do
+    fbp_graph_reg_name = String.to_atom(fbp_graph_id)
+    {:ok, _pid} = GenServer.start_link(__MODULE__,
+                                      [fbp_graph_id, parameters],
+                                      name: fbp_graph_reg_name)
+    {:ok, fbp_graph_reg_name}
   end
 
   @doc """
   Retreive the FBP Graph structure - primarily used for testing/debugging
   """
-  def get(graph_id) do
-    GenServer.call(graph_id, :get)
+  def get(fbp_graph_reg_name) do
+    GenServer.call(fbp_graph_reg_name, :get)
   end
 
   @doc """
   Return the current list of nodes
   """
-  def nodes(graph_id) do
-    GenServer.call(graph_id, :nodes)
+  def nodes(fbp_graph_reg_name) do
+    GenServer.call(fbp_graph_reg_name, :nodes)
   end
 
   @doc """
   Return info about a node.
   """
-  def get_node(graph_id, node_id) do
-    GenServer.call(graph_id, {:get_node, node_id})
+  def get_node(fbp_graph_reg_name, node_id) do
+    GenServer.call(fbp_graph_reg_name, {:get_node, node_id})
   end
 
   @doc """
   Return the current list of edges - primarily used for testing/debugging.
   """
-  def edges(graph_id) do
-    GenServer.call(graph_id, :edges)
+  def edges(fbp_graph_reg_name) do
+    GenServer.call(fbp_graph_reg_name, :edges)
   end
 
   @doc """
   Clear/empty the current FBP Graph. Reset the metadata.
   """
-  def clear(graph_id, parameters \\ %{}) do
-    GenServer.call(graph_id, {:clear,
+  def clear(fbp_graph_reg_name, parameters \\ %{}) do
+    GenServer.call(fbp_graph_reg_name, {:clear,
                                 parameters[:name],
                                 parameters[:library],
                                 parameters[:main],
@@ -94,44 +96,44 @@ defmodule ElixirFBP.Graph do
   @doc """
   Add a node to the FBP Graph
   """
-  def add_node(graph_id, node_id, component, metadata \\ %{}) do
-    GenServer.call(graph_id, {:add_node, node_id, component, metadata})
+  def add_node(fbp_graph_reg_name, node_id, component, metadata \\ %{}) do
+    GenServer.call(fbp_graph_reg_name, {:add_node, node_id, component, metadata})
   end
 
   @doc """
   Remove a node from the FBP Graph
   """
-  def remove_node(graph_id, node_id) do
-    GenServer.call(graph_id, {:remove_node, node_id})
+  def remove_node(fbp_graph_reg_name, node_id) do
+    GenServer.call(fbp_graph_reg_name, {:remove_node, node_id})
   end
 
   @doc """
   Add an edge to the FBP Graph
   """
-  def add_edge(graph_id, src, tgt, metadata \\ %{}) do
-    GenServer.call(graph_id, {:add_edge, src, tgt, metadata})
+  def add_edge(fbp_graph_reg_name, src, tgt, metadata \\ %{}) do
+    GenServer.call(fbp_graph_reg_name, {:add_edge, src, tgt, metadata})
   end
 
   @doc """
   Remove the edge between the two given node/ports in the FBP Graph
   """
-  def remove_edge(graph_id, src, tgt) do
-    GenServer.call(graph_id, {:remove_edge, src, tgt})
+  def remove_edge(fbp_graph_reg_name, src, tgt) do
+    GenServer.call(fbp_graph_reg_name, {:remove_edge, src, tgt})
   end
 
   @doc """
   Place an initial value at the port of a node in the FBP Graph
   """
-  def add_initial(graph_id, src, tgt, metadata \\ %{}) do
-    GenServer.call(graph_id, {:add_initial, src, tgt, metadata})
+  def add_initial(fbp_graph_reg_name, src, tgt, metadata \\ %{}) do
+    GenServer.call(fbp_graph_reg_name, {:add_initial, src, tgt, metadata})
   end
 
   @doc """
   Remove an initial value at the port of a node in the FBP Graph. It is set to
   the value nil.
   """
-  def remove_initial(graph_id, tgt) do
-    GenServer.call(graph_id, {:remove_initial, tgt})
+  def remove_initial(fbp_graph_reg_name, tgt) do
+    GenServer.call(fbp_graph_reg_name, {:remove_initial, tgt})
   end
 
   ########################################################################
@@ -141,9 +143,9 @@ defmodule ElixirFBP.Graph do
   Callback implementation for ElixirFBP.Graph.start_link()
   Initialize the FBP Graph Structure which becomes the State
   """
-  def init([fbp_graph_process_name, parameters]) do
+  def init([fbp_graph_id, parameters]) do
     graph = :digraph.new([:protected])
-    fbp_graph = %ElixirFBP.Graph{id: fbp_graph_process_name,
+    fbp_graph = %ElixirFBP.Graph{id: fbp_graph_id,
                                  name: parameters[:name],
                                  library: parameters[:library],
                                  main: parameters[:main],
