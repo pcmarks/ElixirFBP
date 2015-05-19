@@ -36,7 +36,13 @@ defmodule ElixirFBP.Graph do
     description: "",
     graph: nil
   ]
-  @type t :: %ElixirFBP.Graph{id: String.t, name: String.t}
+  @type t :: %__MODULE__{
+                id: String.t,
+                name: String.t,
+                library: module,
+                main: boolean,
+                description: String.t,
+                graph: atom}
   use GenServer
 
   ########################################################################

@@ -28,12 +28,12 @@ defmodule ElixirFBP.Component do
     # connected to along with its port name. Note that we have to prepend
     # the component name with the string "Elixir."
     outport_args = prepare_outport_args(graph_reg_name, node_id)
-    process_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
+    process_reg_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
     module = Module.concat("Elixir", component)
     # We can spawn the component process now, asking it to execute its loop function.
     process_pid = spawn(module, :loop, inport_args ++ outport_args)
-    Process.register(process_pid, process_name)
-    process_name
+    Process.register(process_pid, process_reg_name)
+    process_reg_name
   end
 
   @doc """
@@ -45,16 +45,23 @@ defmodule ElixirFBP.Component do
   end
 
   @doc """
+  Assemble and send an IP to an inport of a running process.
+  """
+  def send_ip(target, value) do
+    send(target.process_reg_name, {target.inport, value})
+  end
+
+  @doc """
   A private function that can assemble the process id and port name that a
   component is connected to. The connection is between an outport and an inport.
   """
   defp prepare_outport_args(graph_reg_name, node_id) do
     fbp_graph = ElixirFBP.Graph.get(graph_reg_name)
     out_edges = :digraph.out_edges(fbp_graph.graph, node_id)
-    process_id = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
+    process_reg_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
     Enum.map(out_edges, fn(out_edge) ->
       {_, _src_node, _tgt_node, label} = :digraph.edge(fbp_graph.graph, out_edge)
-      %{process_id: process_id, inport: label.tgt_port}
+      %{process_reg_name: process_reg_name, inport: label.tgt_port}
     end)
   end
 
