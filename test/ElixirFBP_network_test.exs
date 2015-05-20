@@ -26,6 +26,8 @@ defmodule ElixirFBPNetworkTest do
                   %{node_id: @node_1, port: :sum},
                   %{node_id: @node_2, port: :in})
 
+    Graph.add_initial(fbp_graph_reg_name, 42, @node_1, :addend)
+    Graph.add_initial(fbp_graph_reg_name, 24, @node_1, :augend)
     {:ok, _fbp_network_pid} =
         Network.start_link(fbp_graph_reg_name)
     Network.start()

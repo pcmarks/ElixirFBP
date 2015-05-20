@@ -8,13 +8,19 @@ defmodule Math.Add do
   def loop(augend, addend, sum) do
     receive do
       {:augend, value} when addend != nil ->
-        Component.send_ip(sum, addend + augend)
+        IO.puts("Math.Add: {:augend, #{value}}")
+        ElixirFBP.Component.send_ip(sum, addend + value)
         loop(nil, nil, sum)
-      {:augend, value} -> loop(value, addend, sum)
+      {:augend, value} ->
+        IO.puts("Math.Add: {:augend, #{value}}")
+        loop(value, addend, sum)
       {:addend, value} when augend != nil ->
-        Component.send_ip(sum, addend + augend)
+        IO.puts("Math.Add: {:addend, #{value}}, augend: #{augend}")
+        ElixirFBP.Component.send_ip(sum, value + augend)
         loop(nil, nil, sum)
-      {:addend, value} -> loop(augend, value, sum)
+      {:addend, value} ->
+        IO.puts("Math.Add: {:addend, #{value}}")
+        loop(augend, value, sum)
       :stop -> nil
     end
   end

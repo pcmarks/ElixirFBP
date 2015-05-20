@@ -130,16 +130,16 @@ defmodule ElixirFBP.Graph do
   @doc """
   Place an initial value at the port of a node in the FBP Graph
   """
-  def add_initial(fbp_graph_reg_name, src, tgt, metadata \\ %{}) do
-    GenServer.call(fbp_graph_reg_name, {:add_initial, src, tgt, metadata})
+  def add_initial(fbp_graph_reg_name, data, node, port, metadata \\ %{}) do
+    GenServer.call(fbp_graph_reg_name, {:add_initial, data, node, port, metadata})
   end
 
   @doc """
   Remove an initial value at the port of a node in the FBP Graph. It is set to
   the value nil.
   """
-  def remove_initial(fbp_graph_reg_name, tgt) do
-    GenServer.call(fbp_graph_reg_name, {:remove_initial, tgt})
+  def remove_initial(fbp_graph_reg_name, node, port) do
+    GenServer.call(fbp_graph_reg_name, {:remove_initial, node, port})
   end
 
   ########################################################################
@@ -254,24 +254,19 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation for ElixirFBP.add_initial()
   """
-  def handle_call({:add_initial, src, tgt, metadata}, _req, fbp_graph) do
-    src_data = src.data
-    node_id = tgt.node_id
-    port = tgt.port
+  def handle_call({:add_initial, data, node_id, port, metadata}, _req, fbp_graph) do
     {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
     inports = label.inports
-    new_inports = Keyword.put(inports, port, src_data)
+    new_inports = Keyword.put(inports, port, data)
     new_label = %{label | :inports => new_inports}
     :digraph.add_vertex(fbp_graph.graph, node_id, new_label)
-    {:reply, src_data, fbp_graph}
+    {:reply, data, fbp_graph}
   end
 
   @doc """
   Callback implementation for ElixirFBP.remove_initial()
   """
-  def handle_call({:remove_initial, tgt}, _req, fbp_graph) do
-    node_id = tgt.node_id
-    port = tgt.port
+  def handle_call({:remove_initial, node_id, port}, _req, fbp_graph) do
     {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
     inports = label.inports
     new_inports = Keyword.put(inports, port, nil)

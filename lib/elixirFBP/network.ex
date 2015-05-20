@@ -77,16 +77,28 @@ defmodule ElixirFBP.Network do
   @doc """
   Callback implementation for ElixirFBP.Network.start()
   Starting a network involves the following steps:
-    1. Spawn (start_link) all components in the graph
+    1. Spawn all components in the graph
     2. Send all initial data values to their respective processes.
 
   """
   def handle_cast(:start, network) do
     graph_reg_name = network.graph_reg_name
     nodes = Graph.nodes(graph_reg_name)
+    # For every component in the graph:
+    #   start the process - constructing outport process id's to send to
     Enum.each(nodes, fn (node) ->
       {node_id, label} = Graph.get_node(graph_reg_name, node)
       Component.start(graph_reg_name, node_id, label.component) end)
+    Enum.each(nodes, fn(node) ->
+      {node_id, label} = Graph.get_node(graph_reg_name, node)
+      inports = label.inports
+      for {port, value} <- inports do
+        if value != nil do
+          process_reg_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
+          Component.send_ip(%{process_reg_name: process_reg_name, inport: port}, value)
+        end
+      end
+    end)
     new_network = %{network | :status => :started}
     {:noreply, new_network}
   end

@@ -18,7 +18,7 @@ defmodule ElixirFBP.Component do
   Return the process name for the spawned process
   """
   def start(graph_reg_name, node_id, component) do
-#    IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
+    # IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
     # Retrieve the list of inports and outports for this type of component
     {inports, _} = Code.eval_string(component <> ".inports")
     {_outports, _} = Code.eval_string(component <> ".outports")
@@ -48,6 +48,7 @@ defmodule ElixirFBP.Component do
   Assemble and send an IP to an inport of a running process.
   """
   def send_ip(target, value) do
+    # IO.puts("\nComponent.send_ip(#{inspect target}, #{inspect value})")
     send(target.process_reg_name, {target.inport, value})
   end
 
@@ -58,9 +59,9 @@ defmodule ElixirFBP.Component do
   defp prepare_outport_args(graph_reg_name, node_id) do
     fbp_graph = ElixirFBP.Graph.get(graph_reg_name)
     out_edges = :digraph.out_edges(fbp_graph.graph, node_id)
-    process_reg_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
     Enum.map(out_edges, fn(out_edge) ->
-      {_, _src_node, _tgt_node, label} = :digraph.edge(fbp_graph.graph, out_edge)
+      {_, _src_node, tgt_node, label} = :digraph.edge(fbp_graph.graph, out_edge)
+      process_reg_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> tgt_node)
       %{process_reg_name: process_reg_name, inport: label.tgt_port}
     end)
   end

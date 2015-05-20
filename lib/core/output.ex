@@ -6,7 +6,7 @@ defmodule Core.Output do
   def loop(in_port, outports) do
     receive do
       {:in, value} ->
-        IO.puts("Core.Output:in = #{inspect value}")
+        IO.puts("\nCore.Output:in = #{inspect value}")
         loop(nil, nil)
     end
   end
