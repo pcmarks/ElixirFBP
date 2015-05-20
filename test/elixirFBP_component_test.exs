@@ -17,8 +17,8 @@ defmodule ElixirFBPComponentTest do
     Graph.add_node(fbp_graph_reg_name, @node_2, "Math.Add")
     _edge = Graph.add_edge(
                   fbp_graph_reg_name,
-                  %{node_id: @node_1, port: :sum},
-                  %{node_id: @node_2, port: :addend})
+                  @node_1, :sum,
+                  @node_2, :addend)
     process_reg_name = Component.start(fbp_graph_reg_name, @node_1, "Math.Add")
     assert process_reg_name == String.to_atom(@graph_1 <> "_" <> @node_1)
     process_pid = Process.whereis(process_reg_name)
@@ -36,8 +36,8 @@ defmodule ElixirFBPComponentTest do
     Graph.add_node(fbp_graph_reg_name, @node_2, "Math.Add")
     _edge = Graph.add_edge(
                   fbp_graph_reg_name,
-                  %{node_id: @node_1, port: :sum},
-                  %{node_id: @node_2, port: :addend})
+                  @node_1, :sum,
+                  @node_2, :addend)
     Graph.add_initial(fbp_graph_reg_name, 42, @node_1, :augend)
     Graph.add_initial(fbp_graph_reg_name, 42, @node_1, :addend)
     Network.start()

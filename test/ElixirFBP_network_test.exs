@@ -23,8 +23,8 @@ defmodule ElixirFBPNetworkTest do
     Graph.add_node(fbp_graph_reg_name, @node_2, "Core.Output")
     _edge = Graph.add_edge(
                   fbp_graph_reg_name,
-                  %{node_id: @node_1, port: :sum},
-                  %{node_id: @node_2, port: :in})
+                  @node_1, :sum,
+                  @node_2, :in)
 
     Graph.add_initial(fbp_graph_reg_name, 42, @node_1, :addend)
     Graph.add_initial(fbp_graph_reg_name, 24, @node_1, :augend)

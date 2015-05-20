@@ -63,8 +63,8 @@ defmodule ElixirFBPGraphTest do
     Graph.add_node(fbp_graph_reg_name, @node_2, "Math.Add")
     edge = Graph.add_edge(
                   fbp_graph_reg_name,
-                  %{node_id: @node_1, port: :sum},
-                  %{node_id: @node_2, port: :addend})
+                  @node_1, :sum,
+                  @node_2, :addend)
     fbp_graph = Graph.get(fbp_graph_reg_name)
     {_edge_id, node1, node2, label} = :digraph.edge(fbp_graph.graph, edge)
     assert node1 == @node_1
@@ -80,13 +80,13 @@ defmodule ElixirFBPGraphTest do
     Graph.add_node(fbp_graph_reg_name, @node_2, "Math.Add")
     edge = Graph.add_edge(
                   fbp_graph_reg_name,
-                  %{node_id: @node_1, port: :sum},
-                  %{node_id: @node_2, port: :addend})
+                  @node_1, :sum,
+                  @node_2, :addend)
     # Now remove it
     result = Graph.remove_edge(
                   fbp_graph_reg_name,
-                  %{node_id: @node_1, port: :sum},
-                  %{node_id: @node_2, port: :addend})
+                  @node_1, :sum,
+                  @node_2, :addend)
     assert result == true
   end
 
@@ -105,6 +105,7 @@ defmodule ElixirFBPGraphTest do
   test "Remove an initial value from a node port" do
     {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
     Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add")
+    Graph.add_initial(fbp_graph_reg_name, 27, @node_1, :addend)
     result = Graph.remove_initial(fbp_graph_reg_name, @node_1, :addend)
     assert result == nil
     # Double-check that the value is = nil
