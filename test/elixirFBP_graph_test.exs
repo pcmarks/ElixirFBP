@@ -4,7 +4,7 @@ defmodule ElixirFBPGraphTest do
   alias ElixirFBP.Graph
 
   # Testing parameters
-  @graph_1 "graph_1"
+  @graph_1 "graph_g1"
   @node_1 "node_1"
   @node_2 "node_2"
 

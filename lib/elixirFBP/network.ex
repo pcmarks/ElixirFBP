@@ -19,6 +19,7 @@ defmodule ElixirFBP.Network do
     graph_reg_name: nil,
     status: :stopped
   ]
+
   use GenServer
 
   alias ElixirFBP.Graph
@@ -61,6 +62,13 @@ defmodule ElixirFBP.Network do
   """
   def data(graph_id, edge_id, src, tgt, subgraph \\ nil) do
     GenServer.cast(__MODULE__, {:data, graph_id, edge_id, src, tgt, subgraph})
+  end
+
+  @doc """
+  Stop the Network GenServer process
+  """
+  def stop_network do
+    GenServer.call(__MODULE__, :stop_network)
   end
 
   ########################################################################
@@ -106,7 +114,7 @@ defmodule ElixirFBP.Network do
   @doc """
   Callback implementation for ElixirFBP.Network.stop()
   Stop the currently running graph.
-  Unregister all of the node processes.
+  Unregister and kill all of the node processes.
   """
   def handle_cast(:stop, network) do
     graph_reg_name = network.graph_reg_name
@@ -133,9 +141,14 @@ defmodule ElixirFBP.Network do
     {:reply, network.status, network}
   end
 
-  defp start_node(node) do
-    component = node.label.component
-    module = Module.concat([component])
-    #spawn_link(component, :s)
+  @doc """
+  Callback implementation for stopping the Network - Note that this is different
+  than the stop function.
+  """
+  def handle_call(:stop_network, _req, network) do
+    # Stop the Graph GenServer
+    Graph.stop(network.graph_reg_name)
+    {:stop, :normal, :ok, network}
   end
+
 end

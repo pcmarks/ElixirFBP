@@ -2,8 +2,8 @@ defmodule Math.Add do
   @moduledoc """
   This module describes an FBP Component: Math.Add
   """
-  def inports, do: [{:addend, nil}, {:augend, nil}]
-  def outports, do: [{:sum, nil}]
+  def inports, do: [addend: nil, augend: nil]
+  def outports, do: [sum: nil]
 
   def loop(augend, addend, sum) do
     receive do
@@ -21,7 +21,6 @@ defmodule Math.Add do
       {:addend, value} ->
         IO.puts("Math.Add: {:addend, #{value}}")
         loop(augend, value, sum)
-      :stop -> nil
     end
   end
 end

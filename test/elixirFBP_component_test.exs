@@ -6,8 +6,8 @@ defmodule ElixirFBPComponentTest do
   alias ElixirFBP.Network
 
   # Testing parameters
-  @graph_1 "graph_1"
-  @graph_2 "graph_2"
+  @graph_1 "graph_c1"
+  @graph_2 "graph_c2"
   @node_1 "node_1"
   @node_2 "node_2"
 
@@ -23,9 +23,9 @@ defmodule ElixirFBPComponentTest do
     assert process_reg_name == String.to_atom(@graph_1 <> "_" <> @node_1)
     process_pid = Process.whereis(process_reg_name)
     assert Process.alive?(process_pid)
-    # Make sure the process and the graph are unregistered
-    Process.unregister(process_reg_name)
-    Process.unregister(fbp_graph_reg_name)
+    # Stop the component
+    Component.stop(fbp_graph_reg_name, @node_1)
+
   end
 
   test "Start a component with initial values" do
@@ -42,7 +42,6 @@ defmodule ElixirFBPComponentTest do
     Graph.add_initial(fbp_graph_reg_name, 42, @node_1, :addend)
     Network.start()
     Network.stop()
-    Process.unregister(fbp_graph_reg_name)
   end
 
 end

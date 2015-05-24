@@ -37,18 +37,23 @@ defmodule ElixirFBP.Component do
   end
 
   @doc """
-  Stop a component. This means find the process node's pid and unregister it.
+  Stop a component. This means find the process node's pid, unregister it and
+  force an exit.
   """
   def stop(graph_reg_name, node_id) do
     process_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
-    Process.unregister(process_name)
+    pid = Process.whereis(process_name)
+    if pid != nil do
+      Process.unregister(process_name)
+      Process.exit(pid, :kill)      # Not really a normal exit??
+    end
   end
 
   @doc """
   Assemble and send an IP to an inport of a running process.
   """
   def send_ip(target, value) do
-    # IO.puts("\nComponent.send_ip(#{inspect target}, #{inspect value})")
+    IO.puts("\nComponent.send_ip(#{inspect target}, #{inspect value})")
     send(target.process_reg_name, {target.inport, value})
   end
 

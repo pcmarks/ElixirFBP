@@ -3,7 +3,7 @@ defmodule ElixirFBPNetworkTest do
   alias ElixirFBP.Graph
   alias ElixirFBP.Network
 
-  @graph_1      "graph_1"
+  @graph_1      "graph_n1"
   @node_1       "node_1"
   @node_2       "node_2"
 
@@ -15,6 +15,7 @@ defmodule ElixirFBPNetworkTest do
     assert status == :stopped
     # Make sure the network is stopped?
     Network.stop()
+    Network.stop_network()
   end
 
   test "Start an ElxirFBP Network" do
@@ -35,6 +36,8 @@ defmodule ElixirFBPNetworkTest do
     assert status == :started
     # Make sure the network is stopped
     Network.stop()
+    # kill the network process
+    Network.stop_network
   end
 
   test "Stop an ElxirFBP Network" do
@@ -45,6 +48,8 @@ defmodule ElixirFBPNetworkTest do
     Network.stop()
     status = Network.get_status()
     assert status == :stopped
+    # Stop the GenServer Network process
+    Network.stop_network
   end
 
 end
