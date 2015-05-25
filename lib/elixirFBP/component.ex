@@ -33,6 +33,7 @@ defmodule ElixirFBP.Component do
     # We can spawn the component process now, asking it to execute its loop function.
     process_pid = spawn(module, :loop, inport_args ++ outport_args)
     Process.register(process_pid, process_reg_name)
+    # IO.puts("\nPid: #{inspect process_pid} is #{inspect process_reg_name}")
     process_reg_name
   end
 
@@ -53,7 +54,7 @@ defmodule ElixirFBP.Component do
   Assemble and send an IP to an inport of a running process.
   """
   def send_ip(target, value) do
-    IO.puts("\nComponent.send_ip(#{inspect target}, #{inspect value})")
+    # IO.puts("\nComponent.send_ip(#{inspect target}, #{inspect value})")
     send(target.process_reg_name, {target.inport, value})
   end
 
