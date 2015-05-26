@@ -4,14 +4,18 @@ defmodule Jsfbp.Recvr do
   """
   alias ElixirFBP.Component
 
-  def inports,  do: [IN: nil]
+  def inports,  do: [IN: nil, OUT: nil]
   def outports, do: []
 
-  def loop(in_port) do
+  def loop(in_port, out_pid) do
     receive do
+      {:IN, :end} ->
+        send(out_pid, :end)
+      {:OUT, value} ->
+        loop(in_port, value)
       {:IN, data} ->
         IO.puts("data: #{data}")
-        loop(in_port)
+        loop(in_port, out_pid)
     end
   end
 
