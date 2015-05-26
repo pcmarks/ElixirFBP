@@ -301,5 +301,5 @@ defmodule ElixirFBP.Graph do
   def handle_call(:stop, _req, fbp_graph) do
     {:stop, :normal, :ok, fbp_graph}
   end
-  
+
 end
