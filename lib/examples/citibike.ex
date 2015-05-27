@@ -1,38 +1,44 @@
 defmodule Examples.Citibike do
+  @moduledoc """
+  This example is based on the one developed for the Streamtools system:
+  http://blog.nytlabs.com/2014/03/12/streamtools-a-graphical-tool-for-working-with-streams-of-data/
+  It does not include the last step - a mask function.
+
+  """
   alias ElixirFBP.Graph
   alias ElixirFBP.Network
 
-  @graph_1      "citibike"
-  @node_1       "ticker"
-  @node_2       "map"
-  @node_3       "getHTTP"
-  @node_4       "unpack"
-  @node_5       "filter"
-  @node_6       "output"
+  @citibike       "citibike"
+  @ticker         "ticker"
+  @map            "map"
+  @getHTTP        "getHTTP"
+  @unpack         "unpack"
+  @filter         "filter"
+  @output         "output"
 
   def start do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+    {:ok, fbp_graph_reg_name} = Graph.start_link(@citibike)
     # Add the components to the graph
-    Graph.add_node(fbp_graph_reg_name, @node_1, "Streamtools.Ticker")
-    Graph.add_node(fbp_graph_reg_name, @node_2, "Streamtools.Map")
-    Graph.add_node(fbp_graph_reg_name, @node_3, "Streamtools.GetHTTPJSON")
-    Graph.add_node(fbp_graph_reg_name, @node_4, "Streamtools.Unpack")
-    Graph.add_node(fbp_graph_reg_name, @node_5, "Streamtools.Filter")
-    Graph.add_node(fbp_graph_reg_name, @node_6, "Core.Output")
+    Graph.add_node(fbp_graph_reg_name, @ticker, "Streamtools.Ticker")
+    Graph.add_node(fbp_graph_reg_name, @map, "Streamtools.Map")
+    Graph.add_node(fbp_graph_reg_name, @getHTTP, "Streamtools.GetHTTPJSON")
+    Graph.add_node(fbp_graph_reg_name, @unpack, "Streamtools.Unpack")
+    Graph.add_node(fbp_graph_reg_name, @filter, "Streamtools.Filter")
+    Graph.add_node(fbp_graph_reg_name, @output, "Core.Output")
     # Connect the components
-    Graph.add_edge(fbp_graph_reg_name, @node_1, :out, @node_2, :in_port)
-    Graph.add_edge(fbp_graph_reg_name, @node_2, :out, @node_3, :path)
-    Graph.add_edge(fbp_graph_reg_name, @node_3, :out, @node_4, :in_port)
-    Graph.add_edge(fbp_graph_reg_name, @node_4, :out, @node_5, :in_port)
-    Graph.add_edge(fbp_graph_reg_name, @node_5, :out, @node_6, :in_port)
+    Graph.add_edge(fbp_graph_reg_name, @ticker, :out, @map, :in_port)
+    Graph.add_edge(fbp_graph_reg_name, @map, :out, @getHTTP, :path)
+    Graph.add_edge(fbp_graph_reg_name, @getHTTP, :out, @unpack, :in_port)
+    Graph.add_edge(fbp_graph_reg_name, @unpack, :out, @filter, :in_port)
+    Graph.add_edge(fbp_graph_reg_name, @filter, :out, @output, :in_port)
     # Set initial values
-    Graph.add_initial(fbp_graph_reg_name, 10_000, @node_1, :interval)
+    Graph.add_initial(fbp_graph_reg_name, 10_000, @ticker, :interval)
     Graph.add_initial(fbp_graph_reg_name,
                       "http://www.citibikenyc.com/stations/json",
-                      @node_2, :map)
-    Graph.add_initial(fbp_graph_reg_name, "stationBeanList", @node_4, :part)
-    Graph.add_initial(fbp_graph_reg_name, "stationName", @node_5, :filter)
-    Graph.add_initial(fbp_graph_reg_name, "W 41 St & 8 Ave", @node_5, :filter_value)
+                      @map, :map)
+    Graph.add_initial(fbp_graph_reg_name, "stationBeanList", @unpack, :part)
+    Graph.add_initial(fbp_graph_reg_name, "stationName", @filter, :filter)
+    Graph.add_initial(fbp_graph_reg_name, "W 41 St & 8 Ave", @filter, :filter_value)
     # Start the flow
     {:ok, _fbp_network_pid} =
         Network.start_link(fbp_graph_reg_name)
