@@ -32,7 +32,7 @@ defmodule Examples.Fbptest03 do
         Network.start_link(fbp_graph_reg_name)
     Network.start()
     receive do
-      :end ->
+      :no_data ->
         IO.puts("All done!")
         Network.stop
         Network.stop_network

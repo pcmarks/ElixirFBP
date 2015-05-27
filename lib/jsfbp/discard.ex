@@ -2,7 +2,6 @@ defmodule Jsfbp.Discard do
   @moduledoc """
   ElixirFBP implementation of a JSFBP component: https://github.com/jpaulm/jsfbp
   """
-  alias ElixirFBP.Component
 
   def inports,  do: [IN: nil, OUT: nil]
   def outports, do: []
