@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ElixirFBP.Graph</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/elixir.css">
+  </head>
+  <body>
+    <section id="content">
+      <div class="breadcrumbs">ElixirFBP v0.0.1 &rarr; <a href="overview.html">Overview</a> &rarr; <a href="ElixirFBP.html">ElixirFBP</a> &rarr; <a href="ElixirFBP.Graph.html">Graph</a></div>
+      <h1>
+        ElixirFBP.Graph
+        
+      </h1>
+
+      <ul class="summary_links">
+        
+          <li><a href="#summary">Summary</a></li>
+        
+        
+          <li><a href="#types_details">Types</a></li>
+        
+        
+          <li><a href="#functions_details">Functions</a></li>
+        
+        
+        
+      </ul>
+
+      
+        <section id="moduledoc" class="docstring">
+          <p>ElxirFBP.Graph is a GenServer that provides support for the creation and
+maintainance of an FBP Graph.</p>
+<p>An FBP graph contains Nodes connected by Edges. Facilities are provided for
+the creation, deletion, and modification of nodes and edges. Initial Information
+Packets (IIP’s) can also be specified.</p>
+<p>Graphs are implemented using Erlang’s digraph library.</p>
+<p>The digraph Label associated with a node (digraph vertex) is
+[component, inports, outports, metadata] where component is the string name
+of a component - tentatively: “Module”, e.g., “Math.Add”. inports
+and outports are lists of atomic name, initial value pairs, e.g., {:augend, 2}.
+Initial values can be set using the graph add_initial command.</p>
+<p>The digraph Label associated with an edge is [src.port,, tgt.port, metadata] where src.port
+and tgt.port are atom values for the component’s ports.</p>
+<p>Functions supported by this module are based on NoFlo’s FBP Network Protocol,
+specifically the graph sub-protocol. See <a href="http://noflojs.org/documentation/protocol/">http://noflojs.org/documentation/protocol/</a>
+for the details.</p>
+<p>TODO: Provide support for Port and Group maintenance.
+TODO: Use secret parameter
+TODO: Handle :digraph errors
+TODO: Metadata needs to be stored somewhere in add_initial()</p>
+
+        </section>
+      
+
+      
+        <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L1" class="view_source">Source</a>
+      
+
+      
+        <h2 id="summary">Summary<span class="detail_header_links"><a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a></span></h2>
+        <table class="summary">
+          <tr>
+  <td class="summary_signature"><a href="#add_edge/6">add_edge(fbp_graph_reg_name, src_node_id, src_port, tgt_node_id, tgt_port, metadata \\ %{})</a></td>
+  
+    <td class="summary_synopsis"><p>Add an edge to the FBP Graph</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#add_initial/5">add_initial(fbp_graph_reg_name, data, node_id, port, metadata \\ %{})</a></td>
+  
+    <td class="summary_synopsis"><p>Place an initial value at the port of a node in the FBP Graph</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#add_node/4">add_node(fbp_graph_reg_name, node_id, component, metadata \\ %{})</a></td>
+  
+    <td class="summary_synopsis"><p>Add a node to the FBP Graph</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#clear/2">clear(fbp_graph_reg_name, parameters \\ %{})</a></td>
+  
+    <td class="summary_synopsis"><p>Clear/empty the current FBP Graph. Reset the metadata</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#edges/1">edges(fbp_graph_reg_name)</a></td>
+  
+    <td class="summary_synopsis"><p>Return the current list of edges - primarily used for testing/debugging</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#get/1">get(fbp_graph_reg_name)</a></td>
+  
+    <td class="summary_synopsis"><p>Retreive the FBP Graph structure - primarily used for testing/debugging</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#get_node/2">get_node(fbp_graph_reg_name, node_id)</a></td>
+  
+    <td class="summary_synopsis"><p>Return info about a node</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#handle_call/3">handle_call(msg, arg2, state)</a></td>
+  
+    <td class="summary_synopsis"><p>Callback implementation for ElixirFBP.Graph.stop(graph_name)</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#init/1">init(args)</a></td>
+  
+    <td class="summary_synopsis"><p>Callback implementation for ElixirFBP.Graph.start_link()
+Initialize the FBP Graph Structure which becomes the State</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#nodes/1">nodes(fbp_graph_reg_name)</a></td>
+  
+    <td class="summary_synopsis"><p>Return the current list of nodes</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#remove_edge/5">remove_edge(fbp_graph_reg_name, src_node_id, src_port, tgt_node_id, tgt_port)</a></td>
+  
+    <td class="summary_synopsis"><p>Remove the edge between the two given node/ports in the FBP Graph</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#remove_initial/3">remove_initial(fbp_graph_reg_name, node_id, port)</a></td>
+  
+    <td class="summary_synopsis"><p>Remove an initial value at the port of a node in the FBP Graph. It is set to
+the value nil</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#remove_node/2">remove_node(fbp_graph_reg_name, node_id)</a></td>
+  
+    <td class="summary_synopsis"><p>Remove a node from the FBP Graph</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#start_link/2">start_link(fbp_graph_id, parameters \\ %{})</a></td>
+  
+    <td class="summary_synopsis"><p>Starts things off with the creation of the state. Register it with the name
+graph_id - converted to an atom</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#stop/1">stop(fbp_graph_reg_name)</a></td>
+  
+    <td class="summary_synopsis"><p>Stop the GenServer Graph process</p>
+</td>
+  
+</tr>
+
+        </table>
+      
+
+      
+        <section id="types_details" class="details_list">
+          <h2>Types <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a></h2>
+          <div class="type_detail">
+  <p class="typespec" id="t:t/0">
+    <a href="#t:t/0">t</a> :: %ElixirFBP.Graph{id: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, name: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, library: module, main: boolean, description: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, graph: atom}
+  </p>
+  
+</div>
+
+        </section>
+      
+
+      
+        <section id="functions_details" class="details_list">
+          <h2>Functions</h2>
+          <section class="detail">
+  <div class="detail_header" id="add_edge/6">
+    <span class="signature"><strong>add_edge(fbp_graph_reg_name, src_node_id, src_port, tgt_node_id, tgt_port, metadata \\ %{})</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#add_edge/6" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Add an edge to the FBP Graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L119" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="add_initial/5">
+    <span class="signature"><strong>add_initial(fbp_graph_reg_name, data, node_id, port, metadata \\ %{})</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#add_initial/5" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Place an initial value at the port of a node in the FBP Graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L140" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="add_node/4">
+    <span class="signature"><strong>add_node(fbp_graph_reg_name, node_id, component, metadata \\ %{})</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#add_node/4" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Add a node to the FBP Graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L105" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="clear/2">
+    <span class="signature"><strong>clear(fbp_graph_reg_name, parameters \\ %{})</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#clear/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Clear/empty the current FBP Graph. Reset the metadata.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L94" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="edges/1">
+    <span class="signature"><strong>edges(fbp_graph_reg_name)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#edges/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Return the current list of edges - primarily used for testing/debugging.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L87" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="get/1">
+    <span class="signature"><strong>get(fbp_graph_reg_name)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#get/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Retreive the FBP Graph structure - primarily used for testing/debugging</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L66" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="get_node/2">
+    <span class="signature"><strong>get_node(fbp_graph_reg_name, node_id)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#get_node/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Return info about a node.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L80" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="handle_call/3">
+    <span class="signature"><strong>handle_call(msg, arg2, state)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#handle_call/3" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Callback implementation for ElixirFBP.Graph.stop(graph_name)</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L46" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="init/1">
+    <span class="signature"><strong>init(args)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#init/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Callback implementation for ElixirFBP.Graph.start_link()
+Initialize the FBP Graph Structure which becomes the State</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L46" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="nodes/1">
+    <span class="signature"><strong>nodes(fbp_graph_reg_name)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#nodes/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Return the current list of nodes</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L73" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="remove_edge/5">
+    <span class="signature"><strong>remove_edge(fbp_graph_reg_name, src_node_id, src_port, tgt_node_id, tgt_port)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#remove_edge/5" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Remove the edge between the two given node/ports in the FBP Graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L130" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="remove_initial/3">
+    <span class="signature"><strong>remove_initial(fbp_graph_reg_name, node_id, port)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#remove_initial/3" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Remove an initial value at the port of a node in the FBP Graph. It is set to
+the value nil.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L148" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="remove_node/2">
+    <span class="signature"><strong>remove_node(fbp_graph_reg_name, node_id)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#remove_node/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Remove a node from the FBP Graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L112" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="start_link/2">
+    <span class="signature"><strong>start_link(fbp_graph_id, parameters \\ %{})</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#start_link/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Starts things off with the creation of the state. Register it with the name
+graph_id - converted to an atom.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L55" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="stop/1">
+    <span class="signature"><strong>stop(fbp_graph_reg_name)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#stop/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Stop the GenServer Graph process</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L155" class="view_source">Source</a>
+  
+</section>
+
+        </section>
+      
+
+      
+
+      
+    </section>
+
+    <!-- Scripts -->
+    <script>
+      relpath = '';
+      if (relpath != '') relpath += '/';
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/jquery.js"><\/script>')</script>
+    <script src="js/app.js"></script>
+    <script src="js/highlight.pack.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad();
+      hljs.configure({languages: []}); //disable autodetect
+      if (window.top.frames.main) { document.body.className = 'frames'; }
+    </script>
+  </body>
+</html>
