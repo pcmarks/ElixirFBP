@@ -96,7 +96,7 @@ defmodule ElixirFBP.Network do
     #   start the process - constructing outport process id's to send to
     Enum.each(nodes, fn (node) ->
       {node_id, label} = Graph.get_node(graph_reg_name, node)
-      Component.start(graph_reg_name, node_id, label.component) end)
+      Component.start(graph_reg_name, node_id, label) end)
     Enum.each(nodes, fn(node) ->
       {node_id, label} = Graph.get_node(graph_reg_name, node)
       inports = label.inports

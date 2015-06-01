@@ -19,7 +19,8 @@ defmodule ElixirFBPComponentTest do
                   fbp_graph_reg_name,
                   @node_1, :sum,
                   @node_2, :addend)
-    process_reg_name = Component.start(fbp_graph_reg_name, @node_1, "Math.Add")
+    {_node_id, label} = Graph.get_node(fbp_graph_reg_name, @node_1)
+    process_reg_name = Component.start(fbp_graph_reg_name, @node_1, label)
     assert process_reg_name == String.to_atom(@graph_1 <> "_" <> @node_1)
     process_pid = Process.whereis(process_reg_name)
     assert Process.alive?(process_pid)

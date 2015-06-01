@@ -100,9 +100,10 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Add a node to the FBP Graph
+  Add a node to the FBP Graph. Note the number of default processes is 1.
   """
-  def add_node(fbp_graph_reg_name, node_id, component, metadata \\ %{}) do
+  def add_node(fbp_graph_reg_name, node_id, component,
+               metadata \\ %{number_of_processes: 1}) do
     GenServer.call(fbp_graph_reg_name, {:add_node, node_id, component, metadata})
   end
 

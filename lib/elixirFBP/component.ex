@@ -14,14 +14,15 @@ defmodule ElixirFBP.Component do
   Spawn a process, identified by its component (module) name and with a process
   name of the atom value of graph_id <> "_" <> node_id. This function can figure
   out a node's inports and outports by accessing the respective function in the
-  component module definition, e.g. Math.Add.inports
+  component module definition, e.g. Math.Add.inports. The argument label refers to
+  the label value associated with the Erlang :digraph vertex.
   Return the process name for the spawned process
   """
-  def start(graph_reg_name, node_id, component) do
+  def start(graph_reg_name, node_id, label) do
     # IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
     # Retrieve the list of inports and outports for this type of component
-    {inports, _} = Code.eval_string(component <> ".inports")
-    {_outports, _} = Code.eval_string(component <> ".outports")
+    {inports, _} = Code.eval_string(label.component <> ".inports")
+    {_outports, _} = Code.eval_string(label.component <> ".outports")
     # There should be as many nil inport values as different inports
     inport_args = List.duplicate(nil, length(inports))
     # The outport values consists of the Elixir process name of the node it is
@@ -29,7 +30,7 @@ defmodule ElixirFBP.Component do
     # the component name with the string "Elixir."
     outport_args = prepare_outport_args(graph_reg_name, node_id)
     process_reg_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
-    module = Module.concat("Elixir", component)
+    module = Module.concat("Elixir", label.component)
     # We can spawn the component process now, asking it to execute its loop function.
     process_pid = spawn(module, :loop, inport_args ++ outport_args)
     Process.register(process_pid, process_reg_name)
