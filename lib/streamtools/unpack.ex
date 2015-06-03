@@ -12,7 +12,7 @@ defmodule Streamtools.Unpack do
       {:part, value} ->
         loop(value, in_port, out)
       {:in_port, value} ->
-        Component.send_ip(out, value[part])
+        out = Component.send_ip(out, value[part])
         loop(part, value, out)
     end
   end

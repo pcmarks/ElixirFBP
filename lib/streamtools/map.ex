@@ -12,7 +12,7 @@ defmodule Streamtools.Map do
       {:map, value} ->
         loop(in_port, value, out)
       {:in_port, value} ->
-        Component.send_ip(out, map)
+        out = Component.send_ip(out, map)
         loop(value, map, out)
     end
   end

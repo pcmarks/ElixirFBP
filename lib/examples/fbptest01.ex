@@ -18,9 +18,20 @@ defmodule Examples.Fbptest01 do
     Graph.add_edge(fbp_graph_reg_name, @node_2, :OUT, @node_3, :IN)
     # Initialization
     Graph.add_initial(fbp_graph_reg_name, 1_000, @node_1, :COUNT)
+    Graph.add_initial(fbp_graph_reg_name, self(), @node_3, :OUT)
     # Start the flow
     {:ok, _fbp_network_pid} =
         Network.start_link(fbp_graph_reg_name)
     Network.start()
+    receive do
+      message ->
+        IO.puts("All done! with message #{message}")
+        Network.stop
+        Network.stop_network
+    end
+  end
+
+  def time_it do
+    :timer.tc(fn -> start end, [])
   end
 end

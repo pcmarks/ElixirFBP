@@ -11,7 +11,8 @@ defmodule Jsfbp.Reader do
     receive do
       {:FILE, value} ->
         file_stream = File.stream!(value)
-        Enum.each(file_stream, fn(line) -> Component.send_ip(out, line) end)
+        Enum.each(file_stream, fn(line) -> out = Component.send_ip(out, line) end)
+        out = Component.send_ip(out, :end)
         loop(value, out)
     end
   end

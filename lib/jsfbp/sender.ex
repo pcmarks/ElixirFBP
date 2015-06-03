@@ -7,14 +7,20 @@ defmodule Jsfbp.Sender do
   def inports,  do: [COUNT: nil]
   def outports, do: [OUT: nil]
 
-  def loop(_count, out) do
+  def loop(last, out) do
     receive do
       {:COUNT, value} ->
-        for i <- 1..value do
-          Component.send_ip(out, i)
-        end
-        loop(value, out)
+        count_loop(value, 1, out)
     end
+  end
+
+  def count_loop(last, current, out) when current <= last do
+    out = Component.send_ip(out, current)
+    count_loop(last, current + 1, out)
+  end
+  def count_loop(last, _, out) do
+    out = Component.send_ip(out, :end)
+    loop(last, out)
   end
 
 end

@@ -28,10 +28,14 @@ defmodule Examples.Fbptest02 do
         Network.start_link(fbp_graph_reg_name)
     Network.start()
     receive do
-      :end ->
-        IO.puts("All done!")
+      message ->
+        IO.puts("All done! with message #{message}")
         Network.stop
         Network.stop_network
     end
+  end
+
+  def time_it do
+    :timer.tc(fn -> start end, [])
   end
 end

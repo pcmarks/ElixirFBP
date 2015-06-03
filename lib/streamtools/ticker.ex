@@ -14,7 +14,7 @@ defmodule Streamtools.Ticker do
       {:interval, value} ->
         loop(value, out)
       after 10_000 ->
-        Component.send_ip(out, DateFormat.format!(Date.now, "{RFC1123}"))
+        out = Component.send_ip(out, DateFormat.format!(Date.now, "{RFC1123}"))
         loop(interval, out)
     end
   end

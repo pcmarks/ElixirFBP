@@ -12,7 +12,7 @@ defmodule Streamtools.GetHTTPJSON do
       {:path, value} ->
         {:ok, %HTTPoison.Response{body: body}} = HTTPoison.get(value)
         e_body = Poison.decode!(body)
-        Component.send_ip(out, e_body)
+        out = Component.send_ip(out, e_body)
         loop(value, out)
     end
   end

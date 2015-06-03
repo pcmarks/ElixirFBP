@@ -97,13 +97,23 @@ defmodule ElixirFBP.Network do
     Enum.each(nodes, fn (node) ->
       {node_id, label} = Graph.get_node(graph_reg_name, node)
       Component.start(graph_reg_name, node_id, label) end)
+    # For every component's inport, see if there is an initial value. If so,
+    # send this value to all of processes that have been spawned for this
+    # component. We do not use Component.send_ip for this type of message.
     Enum.each(nodes, fn(node) ->
       {node_id, label} = Graph.get_node(graph_reg_name, node)
       inports = label.inports
       for {port, value} <- inports do
         if value != nil do
-          process_reg_name = String.to_atom(Atom.to_string(graph_reg_name) <> "_" <> node_id)
-          Component.send_ip(%{process_reg_name: process_reg_name, inport: port}, value)
+          number_of_processes = label.metadata[:number_of_processes]
+          Enum.each(Range.new(1, number_of_processes), fn(process_no) ->
+            process_reg_name = String.to_atom(
+                                      Atom.to_string(graph_reg_name)
+                                      <> "_"
+                                      <> node_id
+                                      <> "_#{process_no}")
+            send(process_reg_name, {port, value})
+          end)
         end
       end
     end)
@@ -120,8 +130,8 @@ defmodule ElixirFBP.Network do
     graph_reg_name = network.graph_reg_name
     nodes = Graph.nodes(graph_reg_name)
     Enum.each(nodes, fn(node) ->
-      {node_id, _label} = Graph.get_node(graph_reg_name, node)
-      Component.stop(graph_reg_name, node_id) end)
+      {node_id, label} = Graph.get_node(graph_reg_name, node)
+      Component.stop(graph_reg_name, node_id, label) end)
     new_network = %{network | :status => :stopped}
     {:noreply, new_network}
   end

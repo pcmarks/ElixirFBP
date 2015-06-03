@@ -49,26 +49,32 @@ its node name.</p>
           <tr>
   <td class="summary_signature"><a href="#send_ip/2">send_ip(target, value)</a></td>
   
-    <td class="summary_synopsis"><p>Assemble and send an IP to an inport of a running process</p>
+    <td class="summary_synopsis"><p>Assemble and send an IP to an in port of a running process. If there are
+multiple processes for this component, send it to the “next” process.
+Return an updated target with the new next process number</p>
 </td>
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#start/3">start(graph_reg_name, node_id, component)</a></td>
+  <td class="summary_signature"><a href="#start/3">start(graph_reg_name, node_id, label)</a></td>
   
-    <td class="summary_synopsis"><p>Spawn a process, identified by its component (module) name and with a process
-name of the atom value of graph<em>id &lt;&gt; “</em>“ &lt;&gt; node_id. This function can figure
-out a node’s inports and outports by accessing the respective function in the
-component module definition, e.g. Math.Add.inports
-Return the process name for the spawned process</p>
+    <td class="summary_synopsis"><p>This function can figure out a node’s inports and outports by accessing the respective
+function in the component module definition, e.g. Math.Add.inports. The argument label
+refers to the label value associated with the Erlang :digraph vertex.
+Spawn as many process as are specified in the metadata :number<em>of_processes value (the
+default value is one), each identified with a process
+name of the atom value of graph_id &lt;&gt; “</em>“ &lt;&gt; node_id &lt;&gt; process_number, where process_number
+goes from 1 to number_of_processes.
+Return the process name (string) for the spawned process root name and the number of processes
+started</p>
 </td>
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#stop/2">stop(graph_reg_name, node_id)</a></td>
+  <td class="summary_signature"><a href="#stop/3">stop(graph_reg_name, node_id, label)</a></td>
   
-    <td class="summary_synopsis"><p>Stop a component. This means find the process node’s pid, unregister it and
-force an exit</p>
+    <td class="summary_synopsis"><p>Stop a component. This means find the pid of all of the component’s processes,
+unregister it and force an exit</p>
 </td>
   
 </tr>
@@ -92,16 +98,18 @@ force an exit</p>
   </div>
   
   <section class="docstring">
-    <p>Assemble and send an IP to an inport of a running process.</p>
+    <p>Assemble and send an IP to an in port of a running process. If there are
+multiple processes for this component, send it to the “next” process.
+Return an updated target with the new next process number.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L56" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L70" class="view_source">Source</a>
   
 </section>
 <section class="detail">
   <div class="detail_header" id="start/3">
-    <span class="signature"><strong>start(graph_reg_name, node_id, component)</strong></span>
+    <span class="signature"><strong>start(graph_reg_name, node_id, label)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
       <a href="#start/3" class="detail_link" title="Link to this function">#</a>
@@ -110,34 +118,38 @@ force an exit</p>
   </div>
   
   <section class="docstring">
-    <p>Spawn a process, identified by its component (module) name and with a process
-name of the atom value of graph<em>id &lt;&gt; “</em>“ &lt;&gt; node_id. This function can figure
-out a node’s inports and outports by accessing the respective function in the
-component module definition, e.g. Math.Add.inports
-Return the process name for the spawned process</p>
+    <p>This function can figure out a node’s inports and outports by accessing the respective
+function in the component module definition, e.g. Math.Add.inports. The argument label
+refers to the label value associated with the Erlang :digraph vertex.
+Spawn as many process as are specified in the metadata :number<em>of_processes value (the
+default value is one), each identified with a process
+name of the atom value of graph_id &lt;&gt; “</em>“ &lt;&gt; node_id &lt;&gt; process_number, where process_number
+goes from 1 to number_of_processes.
+Return the process name (string) for the spawned process root name and the number of processes
+started</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L20" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L24" class="view_source">Source</a>
   
 </section>
 <section class="detail">
-  <div class="detail_header" id="stop/2">
-    <span class="signature"><strong>stop(graph_reg_name, node_id)</strong></span>
+  <div class="detail_header" id="stop/3">
+    <span class="signature"><strong>stop(graph_reg_name, node_id, label)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
-      <a href="#stop/2" class="detail_link" title="Link to this function">#</a>
+      <a href="#stop/3" class="detail_link" title="Link to this function">#</a>
       <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
     </div>
   </div>
   
   <section class="docstring">
-    <p>Stop a component. This means find the process node’s pid, unregister it and
-force an exit.</p>
+    <p>Stop a component. This means find the pid of all of the component’s processes,
+unregister it and force an exit.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L44" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L52" class="view_source">Source</a>
   
 </section>
 

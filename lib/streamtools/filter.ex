@@ -16,7 +16,7 @@ defmodule Streamtools.Filter do
       {:in_port, data} ->
         for datum <- data do
           if datum[filter] == filter_value do
-            Component.send_ip(out, datum)
+            out = Component.send_ip(out, datum)
           end
         end
         loop(filter, filter_value, data, out)

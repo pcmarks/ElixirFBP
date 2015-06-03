@@ -9,6 +9,7 @@ defmodule Jsfbp.Discard do
   def loop(in_port, out_pid) do
     receive do
       {:IN, :end} ->
+        # We use a "regualar" send not Component.send_ip
         send(out_pid, :end)
       {:IN, value} ->
         loop(value, out_pid)

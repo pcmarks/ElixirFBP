@@ -20,12 +20,13 @@ defmodule ElixirFBPComponentTest do
                   @node_1, :sum,
                   @node_2, :addend)
     {_node_id, label} = Graph.get_node(fbp_graph_reg_name, @node_1)
-    process_reg_name = Component.start(fbp_graph_reg_name, @node_1, label)
-    assert process_reg_name == String.to_atom(@graph_1 <> "_" <> @node_1)
-    process_pid = Process.whereis(process_reg_name)
+    {process_reg_name, no_of_processes} = Component.start(fbp_graph_reg_name, @node_1, label)
+    assert process_reg_name == @graph_1 <> "_" <> @node_1
+    # There should be at least one process with the process number suffix of "_1"
+    process_pid = Process.whereis(String.to_atom(process_reg_name <> "_1"))
     assert Process.alive?(process_pid)
     # Stop the component
-    Component.stop(fbp_graph_reg_name, @node_1)
+    Component.stop(fbp_graph_reg_name, @node_1, label)
 
   end
 
