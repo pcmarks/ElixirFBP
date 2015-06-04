@@ -14,7 +14,8 @@ defmodule ElixirFBP.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :httpoison],
+    [applications: [:logger, :httpoison, :cowboy],
+     mod: {FBPNetwork.WsCowboy, []},
      registered: [:ElixirFBP.Network, :ElixirFBP.Graph]]
   end
 
@@ -30,6 +31,7 @@ defmodule ElixirFBP.Mixfile do
   defp deps do
     [{:httpoison, "~> 0.6"},
      {:timex, "~> 0.13.4"},
+     {:cowboy, "~> 1.0.0"},
      {:poison, "~> 1.4.0"},
      {:ex_doc, github: "elixir-lang/ex_doc"},
      {:earmark, ">= 0.0.0"}]
