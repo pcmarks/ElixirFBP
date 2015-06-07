@@ -2,6 +2,7 @@ defmodule ElixirFBPGraphTest do
   use ExUnit.Case, async: false
 
   alias ElixirFBP.Graph
+  alias ElixirFBP.Network
 
   # Testing parameters
   @graph_1 "graph_g1"
@@ -14,21 +15,27 @@ defmodule ElixirFBPGraphTest do
     assert :digraph == elem(fbp_graph.graph, 0)
   end
 
-  test "Clear the FBP graph" do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
-    Graph.clear(fbp_graph_reg_name)
+  test "Clear an FBP graph" do
+    Network.start_link
+    {:ok, fbp_graph_reg_name} = Network.clear(@graph_1)
     fbp_graph = Graph.get(fbp_graph_reg_name)
     assert :digraph.no_edges(fbp_graph.graph) == 0
     assert :digraph.no_vertices(fbp_graph.graph) == 0
+    Network.stop(@graph_1)
+    assert :ok = Network.stop
   end
 
-  test "Clear the FBP graph and change the description" do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+  test "Clear an FBP graph and change its description" do
+    Network.start_link
+    {:ok, fbp_graph_reg_name} =Network.clear(@graph_1)
     fbp_graph = Graph.get(fbp_graph_reg_name)
     assert nil == fbp_graph.description
-    Graph.clear(fbp_graph_reg_name, %{description: "this is a test"})
+    {:ok, ^fbp_graph_reg_name} =
+          Network.clear(@graph_1, %{description: "this is a test"})
     fbp_graph = Graph.get(fbp_graph_reg_name)
     assert "this is a test" == fbp_graph.description
+    Network.stop(@graph_1)
+    assert :ok = Network.stop
   end
 
   test "Add a node" do

@@ -33,7 +33,11 @@ defmodule ElixirFBP.Graph do
     name: "",
     library: nil,
     main: false,
+    icon: nil,
     description: "",
+    registered_name: nil,
+    running: false,
+    started: false,
     graph: nil
   ]
   @type t :: %__MODULE__{
@@ -41,8 +45,13 @@ defmodule ElixirFBP.Graph do
                 name: String.t,
                 library: module,
                 main: boolean,
+                icon: String.t,
                 description: String.t,
+                registered_name: atom,
+                running: boolean,
+                started: boolean,
                 graph: atom}
+
   use GenServer
 
   ########################################################################
@@ -52,12 +61,34 @@ defmodule ElixirFBP.Graph do
   Starts things off with the creation of the state. Register it with the name
   graph_id - converted to an atom.
   """
-  def start_link(fbp_graph_id, parameters \\ %{}) do
-    fbp_graph_reg_name = String.to_atom(fbp_graph_id)
+  def start_link(graph_id, parameters \\ %{}) do
+    registered_name = String.to_atom(graph_id)
     {:ok, _pid} = GenServer.start_link(__MODULE__,
-                                      [fbp_graph_id, parameters],
-                                      name: fbp_graph_reg_name)
-    {:ok, fbp_graph_reg_name}
+                                      [graph_id, registered_name, parameters],
+                                      name: registered_name)
+    {:ok, registered_name}
+  end
+
+  @doc """
+  Set the parameters associated with this graph
+  """
+  def set_parameters(fbp_graph_reg_name, parameters \\ %{}) do
+    GenServer.call(fbp_graph_reg_name, {:set_parameters, parameters})
+  end
+
+  @doc """
+  Start the execution of the components in this graph.
+  """
+  def start(fbp_graph_reg_name) do
+    GenServer.call(fbp_graph_reg_name, :start)
+  end
+
+  @doc """
+  Stop the execution of the components in this graph.
+  This should normally be called via the Network.stop(graph_id) function.
+  """
+  def stop_graph(fbp_graph_reg_name) do
+    GenServer.call(fbp_graph_reg_name, :stop_graph)
   end
 
   @doc """
@@ -65,6 +96,13 @@ defmodule ElixirFBP.Graph do
   """
   def get(fbp_graph_reg_name) do
     GenServer.call(fbp_graph_reg_name, :get)
+  end
+
+  @doc """
+  Return the status variables for this graph
+  """
+  def get_status(fbp_graph_reg_name) do
+    GenServer.call(fbp_graph_reg_name, :get_status)
   end
 
   @doc """
@@ -86,17 +124,6 @@ defmodule ElixirFBP.Graph do
   """
   def edges(fbp_graph_reg_name) do
     GenServer.call(fbp_graph_reg_name, :edges)
-  end
-
-  @doc """
-  Clear/empty the current FBP Graph. Reset the metadata.
-  """
-  def clear(fbp_graph_reg_name, parameters \\ %{}) do
-    GenServer.call(fbp_graph_reg_name, {:clear,
-                                parameters[:name],
-                                parameters[:library],
-                                parameters[:main],
-                                parameters[:description]})
   end
 
   @doc """
@@ -151,7 +178,7 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Stop the GenServer Graph process
+  Stop this GenServer
   """
   def stop(fbp_graph_reg_name) do
     GenServer.call(fbp_graph_reg_name, :stop)
@@ -161,18 +188,74 @@ defmodule ElixirFBP.Graph do
   # The GenServer implementations
 
   @doc """
-  Callback implementation for ElixirFBP.Graph.start_link()
-  Initialize the FBP Graph Structure which becomes the State
+  Callback implementation for ElixirFBP.Graph.clear()
+  Create and initialize the FBP Graph Structure which becomes the State
   """
-  def init([fbp_graph_id, parameters]) do
+  def init([graph_id, registered_name, parameters]) do
+    # The digraph is where all the nodes and edges are stored
     graph = :digraph.new([:protected])
-    fbp_graph = %ElixirFBP.Graph{id: fbp_graph_id,
+    fbp_graph = %ElixirFBP.Graph{id: graph_id,
                                  name: parameters[:name],
                                  library: parameters[:library],
                                  main: parameters[:main],
+                                 icon: parameters[:icon],
                                  description: parameters[:description],
+                                 registered_name: registered_name,
                                  graph: graph}
     {:ok, fbp_graph}
+  end
+
+  @doc """
+  Callback implementation of ElixirFBP.Graph.set_parameters()
+  Set the parameters associated with this registered graph
+  """
+  def handle_call({:set_parameters, parameters}, _req, fbp_graph) do
+    new_fbp_graph = %ElixirFBP.Graph{fbp_graph |
+                                    name: parameters[:name],
+                                    library: parameters[:library],
+                                    main: parameters[:main],
+                                    icon: parameters[:icon],
+                                    description: parameters[:description]}
+    {:reply, :ok, new_fbp_graph}
+  end
+
+  @doc """
+  Callback implementation of ElixirFBP.Graph.start()
+  Starting a graph involves the following steps:
+    1. Spawn all components in the graph
+    2. Send all initial data values to their respective processes.
+
+  """
+  def handle_call(:start, _req, fbp_graph) do
+    reg_name = fbp_graph.registered_name
+    nodes = :digraph.vertices(fbp_graph.graph)
+    # For every component in the graph:
+    #   start the process - constructing outport process id's to send to
+    Enum.each(nodes, fn (node) ->
+      {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
+    # For every component's inport, see if there is an initial value. If so,
+      ElixirFBP.Component.start(reg_name, node_id, label, fbp_graph.graph) end)
+    # send this value to all of processes that have been spawned for this
+    # component. We do not use Component.send_ip for this type of message.
+    Enum.each(nodes, fn(node) ->
+      {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
+      inports = label.inports
+      for {port, value} <- inports do
+        if value != nil do
+          number_of_processes = label.metadata[:number_of_processes]
+          Enum.each(Range.new(1, number_of_processes), fn(process_no) ->
+            process_reg_name = String.to_atom(
+                                      Atom.to_string(reg_name)
+                                      <> "_"
+                                      <> node_id
+                                      <> "_#{process_no}")
+            send(process_reg_name, {port, value})
+          end)
+        end
+      end
+    end)
+    new_fbp_graph = %ElixirFBP.Graph{fbp_graph | started: true, running: true}
+    {:reply, :ok, new_fbp_graph}
   end
 
   @doc """
@@ -181,6 +264,14 @@ defmodule ElixirFBP.Graph do
   """
   def handle_call(:get, _req, fbp_graph) do
     {:reply, fbp_graph, fbp_graph}
+  end
+
+  @doc """
+  Callback implementation of ElixirFBP.Graph.get_status()
+  Return the status variables as a tuple.
+  """
+  def handle_call(:get_status, _req, fbp_graph) do
+    {:reply, {fbp_graph.running, fbp_graph.started}, fbp_graph}
   end
 
   @doc """
@@ -206,24 +297,6 @@ defmodule ElixirFBP.Graph do
   """
   def handle_call(:edges, _req, fbp_graph) do
     {:reply, :digraph.edges(fbp_graph.graph), fbp_graph}
-  end
-
-  @doc """
-  Callback implementation of ElixirFBP.Graph.clear()
-  A request to clear the FBP Graph. Clearing is accomplished by
-  deleting all the vertices and all the edges.
-  """
-  def handle_call({:clear, name, library, main, description},
-                    _req, fbp_graph) do
-    graph = fbp_graph.graph
-    graph_id = fbp_graph.id
-    vertices = :digraph.vertices(graph)
-    edges = :digraph.edges(graph)
-    :digraph.del_vertices(graph, vertices)
-    :digraph.del_edges(graph, edges)
-    new_fbp_graph = %ElixirFBP.Graph{id: graph_id, name: name, library: library,
-          main: main, description: description, graph: graph}
-    {:reply, new_fbp_graph, new_fbp_graph}
   end
 
   @doc """
@@ -298,9 +371,31 @@ defmodule ElixirFBP.Graph do
 
   @doc """
   Callback implementation for ElixirFBP.Graph.stop(graph_name)
+  Stop the execution of a graph.
+  Unregister and kill all of the node processes.
+  """
+  def handle_call(:stop_graph, _req, fbp_graph) do
+    reg_name = fbp_graph.registered_name
+    nodes = :digraph.vertices(fbp_graph.graph)
+    Enum.each(nodes, fn(node) ->
+      {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
+      ElixirFBP.Component.stop(reg_name, node_id, label) end)
+      new_fbp_graph = %ElixirFBP.Graph{fbp_graph | running: false, started: false}
+    {:reply, :ok, new_fbp_graph}
+  end
+
+  @doc """
+  Callback implementation for stopping this GenServer.
   """
   def handle_call(:stop, _req, fbp_graph) do
+    # Graph.stop(fbp_graph.registered_name)
     {:stop, :normal, :ok, fbp_graph}
   end
 
+  @doc """
+  Callback implementation triggered by asking the GenServer to :stop
+  """
+  def terminate(reason, fbp_graph) do
+    :ok
+  end
 end

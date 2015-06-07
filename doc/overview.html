@@ -51,8 +51,10 @@ maintainance of an FBP Graph</p>
 <tr>
   <td class="summary_signature"><a href="ElixirFBP.Network.html">ElixirFBP.Network</a></td>
   
-    <td class="summary_synopsis"><p>ElxirFBP.Network is a GenServer that provides support for starting and stopping
-FBP networks(graphs), and finding out about their state</p>
+    <td class="summary_synopsis"><p>ElxirFBP.Network is a GenServer that provides support for starting and stopping a
+FBP network, and finding out about its state. The network keeps
+a dictionary of graphs ids, each of which points to an ElixirFBP.Graph structure.
+Graphs are implemented as GenServers</p>
 </td>
   
 </tr>
@@ -108,6 +110,26 @@ Note the extra metadata Map argument contining the key :number_of_processes</p>
     <td class="summary_synopsis"><p>ElixirFBP implementation of a JSFBP component: <a href="https://github.com/jpaulm/jsfbp">https://github.com/jpaulm/jsfbp</a>
 This is the multi process version of Examples.Fbptestv1.ex</p>
 </td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="FBPNetwork.FBPHandler.html">FBPNetwork.FBPHandler</a></td>
+  
+    <td class="summary_synopsis"><p>FBPHandler contains functions that execute the Flow-Based Programming (FBP)
+Network Protocol commands</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="FBPNetwork.WsCowboy.html">FBPNetwork.WsCowboy</a></td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="FBPNetwork.WsHandler.html">FBPNetwork.WsHandler</a></td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="FBPNetwork.WsSupervisor.html">FBPNetwork.WsSupervisor</a></td>
   
 </tr>
 <tr>

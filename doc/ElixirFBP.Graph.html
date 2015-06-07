@@ -83,13 +83,6 @@ TODO: Metadata needs to be stored somewhere in add_initial()</p>
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#clear/2">clear(fbp_graph_reg_name, parameters \\ %{})</a></td>
-  
-    <td class="summary_synopsis"><p>Clear/empty the current FBP Graph. Reset the metadata</p>
-</td>
-  
-</tr>
-<tr>
   <td class="summary_signature"><a href="#edges/1">edges(fbp_graph_reg_name)</a></td>
   
     <td class="summary_synopsis"><p>Return the current list of edges - primarily used for testing/debugging</p>
@@ -111,17 +104,24 @@ TODO: Metadata needs to be stored somewhere in add_initial()</p>
   
 </tr>
 <tr>
+  <td class="summary_signature"><a href="#get_status/1">get_status(fbp_graph_reg_name)</a></td>
+  
+    <td class="summary_synopsis"><p>Return the status variables for this graph</p>
+</td>
+  
+</tr>
+<tr>
   <td class="summary_signature"><a href="#handle_call/3">handle_call(msg, arg2, state)</a></td>
   
-    <td class="summary_synopsis"><p>Callback implementation for ElixirFBP.Graph.stop(graph_name)</p>
+    <td class="summary_synopsis"><p>Callback implementation for stopping this GenServer</p>
 </td>
   
 </tr>
 <tr>
   <td class="summary_signature"><a href="#init/1">init(args)</a></td>
   
-    <td class="summary_synopsis"><p>Callback implementation for ElixirFBP.Graph.start_link()
-Initialize the FBP Graph Structure which becomes the State</p>
+    <td class="summary_synopsis"><p>Callback implementation for ElixirFBP.Graph.clear()
+Create and initialize the FBP Graph Structure which becomes the State</p>
 </td>
   
 </tr>
@@ -155,7 +155,21 @@ the value nil</p>
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#start_link/2">start_link(fbp_graph_id, parameters \\ %{})</a></td>
+  <td class="summary_signature"><a href="#set_parameters/2">set_parameters(fbp_graph_reg_name, parameters \\ %{})</a></td>
+  
+    <td class="summary_synopsis"><p>Set the parameters associated with this graph</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#start/1">start(fbp_graph_reg_name)</a></td>
+  
+    <td class="summary_synopsis"><p>Start the execution of the components in this graph</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#start_link/2">start_link(graph_id, parameters \\ %{})</a></td>
   
     <td class="summary_synopsis"><p>Starts things off with the creation of the state. Register it with the name
 graph_id - converted to an atom</p>
@@ -165,7 +179,22 @@ graph_id - converted to an atom</p>
 <tr>
   <td class="summary_signature"><a href="#stop/1">stop(fbp_graph_reg_name)</a></td>
   
-    <td class="summary_synopsis"><p>Stop the GenServer Graph process</p>
+    <td class="summary_synopsis"><p>Stop this GenServer</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#stop_graph/1">stop_graph(fbp_graph_reg_name)</a></td>
+  
+    <td class="summary_synopsis"><p>Stop the execution of the components in this graph.
+This should normally be called via the Network.stop(graph_id) function</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#terminate/2">terminate(reason, fbp_graph)</a></td>
+  
+    <td class="summary_synopsis"><p>Callback implementation triggered by asking the GenServer to :stop</p>
 </td>
   
 </tr>
@@ -178,7 +207,7 @@ graph_id - converted to an atom</p>
           <h2>Types <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a></h2>
           <div class="type_detail">
   <p class="typespec" id="t:t/0">
-    <a href="#t:t/0">t</a> :: %ElixirFBP.Graph{id: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, name: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, library: module, main: boolean, description: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, graph: atom}
+    <a href="#t:t/0">t</a> :: %ElixirFBP.Graph{id: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, name: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, library: module, main: boolean, icon: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, description: <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, registered_name: atom, running: boolean, started: boolean, graph: atom}
   </p>
   
 </div>
@@ -204,7 +233,7 @@ graph_id - converted to an atom</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L120" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L147" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -222,7 +251,7 @@ graph_id - converted to an atom</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L141" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L168" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -240,25 +269,7 @@ graph_id - converted to an atom</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L105" class="view_source">Source</a>
-  
-</section>
-<section class="detail">
-  <div class="detail_header" id="clear/2">
-    <span class="signature"><strong>clear(fbp_graph_reg_name, parameters \\ %{})</strong></span>
-    <div class="detail_header_links">
-      <span class="detail_type">(function)</span>
-      <a href="#clear/2" class="detail_link" title="Link to this function">#</a>
-      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
-    </div>
-  </div>
-  
-  <section class="docstring">
-    <p>Clear/empty the current FBP Graph. Reset the metadata.</p>
-
-  </section>
-  
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L94" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L132" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -276,7 +287,7 @@ graph_id - converted to an atom</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L87" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L125" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -294,7 +305,7 @@ graph_id - converted to an atom</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L66" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L97" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -312,7 +323,25 @@ graph_id - converted to an atom</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L80" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L118" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="get_status/1">
+    <span class="signature"><strong>get_status(fbp_graph_reg_name)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#get_status/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Return the status variables for this graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L104" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -326,11 +355,11 @@ graph_id - converted to an atom</p>
   </div>
   
   <section class="docstring">
-    <p>Callback implementation for ElixirFBP.Graph.stop(graph_name)</p>
+    <p>Callback implementation for stopping this GenServer.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L46" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L55" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -344,12 +373,12 @@ graph_id - converted to an atom</p>
   </div>
   
   <section class="docstring">
-    <p>Callback implementation for ElixirFBP.Graph.start_link()
-Initialize the FBP Graph Structure which becomes the State</p>
+    <p>Callback implementation for ElixirFBP.Graph.clear()
+Create and initialize the FBP Graph Structure which becomes the State</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L46" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L55" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -367,7 +396,7 @@ Initialize the FBP Graph Structure which becomes the State</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L73" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L111" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -385,7 +414,7 @@ Initialize the FBP Graph Structure which becomes the State</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L131" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L158" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -404,7 +433,7 @@ the value nil.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L149" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L176" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -422,12 +451,48 @@ the value nil.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L113" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L140" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="set_parameters/2">
+    <span class="signature"><strong>set_parameters(fbp_graph_reg_name, parameters \\ %{})</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#set_parameters/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Set the parameters associated with this graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L75" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="start/1">
+    <span class="signature"><strong>start(fbp_graph_reg_name)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#start/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Start the execution of the components in this graph.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L82" class="view_source">Source</a>
   
 </section>
 <section class="detail">
   <div class="detail_header" id="start_link/2">
-    <span class="signature"><strong>start_link(fbp_graph_id, parameters \\ %{})</strong></span>
+    <span class="signature"><strong>start_link(graph_id, parameters \\ %{})</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
       <a href="#start_link/2" class="detail_link" title="Link to this function">#</a>
@@ -441,7 +506,7 @@ graph_id - converted to an atom.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L55" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L64" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -455,11 +520,48 @@ graph_id - converted to an atom.</p>
   </div>
   
   <section class="docstring">
-    <p>Stop the GenServer Graph process</p>
+    <p>Stop this GenServer</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L156" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L183" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="stop_graph/1">
+    <span class="signature"><strong>stop_graph(fbp_graph_reg_name)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#stop_graph/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Stop the execution of the components in this graph.
+This should normally be called via the Network.stop(graph_id) function.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L90" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="terminate/2">
+    <span class="signature"><strong>terminate(reason, fbp_graph)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#terminate/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Callback implementation triggered by asking the GenServer to :stop</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L55" class="view_source">Source</a>
   
 </section>
 

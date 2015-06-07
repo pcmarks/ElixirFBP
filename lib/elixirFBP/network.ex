@@ -1,25 +1,27 @@
 defmodule ElixirFBP.Network do
   @moduledoc """
-  ElxirFBP.Network is a GenServer that provides support for starting and stopping
-  FBP networks(graphs), and finding out about their state.
+  ElxirFBP.Network is a GenServer that provides support for starting and stopping a
+  FBP network, and finding out about its state. The network keeps
+  a dictionary of graphs ids, each of which points to an ElixirFBP.Graph structure.
+  Graphs are implemented as GenServers
 
   Functions supported by this module are based on NoFlo's FBP Network Protocol,
   specifically the network sub-protocol. See http://noflojs.org/documentation/protocol/
-  for the details.
+  for the details. There is one exception: the clear graph command is implemented here.
+
+  There is a function - remove_graph - that is not part
+  of the Network Protocol.
 
   This module is registered with its module name.
-
-  It is assumed that the ElixirFBP.Graph GenServer, which becomes this servers
-  state, has been started and registered with its id as its name.
 
   TODO: Finish implementation of data function
 
   """
   defstruct [
-    graph_reg_name: nil,
-    status: :stopped
+    graph_reg_names: HashDict.new # graph id => registered name
   ]
 
+  #This module's behaviour
   use GenServer
 
   alias ElixirFBP.Graph
@@ -29,32 +31,46 @@ defmodule ElixirFBP.Network do
   # The External API
 
   @doc """
-  Starts things off with the creation of the state. The argument is the FBP
-  Graph registered process name.
+  Starts things off with the creation of the empty state.
   """
-  def start_link(fbp_graph_reg_name) do
-    GenServer.start_link(__MODULE__, fbp_graph_reg_name, name: __MODULE__)
+  def start_link do
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   @doc """
-  Start execution of the graph
+  Clear adds a new graph in the network. This command is part of the Graph protocol
+  but here it is implemented as a network command because it seems like a better fit.
   """
-  def start do
-    GenServer.cast(__MODULE__, :start)
+  def clear(graph_id, parameters \\ %{}) do
+    GenServer.call(__MODULE__, {:clear, graph_id, parameters})
+  end
+
+  @doc """
+  Remove a graph from this network.
+  """
+  def remove_graph(graph_id) do
+    GenServer.call(__MODULE__, {:remove_graph, graph_id})
+  end
+
+  @doc """
+  Start execution of a graph
+  """
+  def start(graph_id) do
+    GenServer.call(__MODULE__, {:start, graph_id})
   end
 
   @doc """
   Stop the execution of the graph
   """
-  def stop do
-    GenServer.cast(__MODULE__, :stop)
+  def stop(graph_id) do
+    GenServer.call(__MODULE__, {:stop, graph_id})
   end
 
   @doc """
-  Get the networks current status
+  Get the current status of a graph
   """
-  def get_status do
-    GenServer.call(__MODULE__, :get_status)
+  def get_status(graph_id) do
+    GenServer.call(__MODULE__, {:get_status, graph_id})
   end
 
   @doc """
@@ -67,8 +83,8 @@ defmodule ElixirFBP.Network do
   @doc """
   Stop the Network GenServer process
   """
-  def stop_network do
-    GenServer.call(__MODULE__, :stop_network)
+  def stop do
+    GenServer.call(__MODULE__, :stop)
   end
 
   ########################################################################
@@ -76,89 +92,92 @@ defmodule ElixirFBP.Network do
 
   @doc """
   Callback implementation for ElixirFBP.Network.start_link()
-  Initialize the state with an FBP graph.
+  Initialize the state - no graphs. There are no initialization args.
   """
-  def init(fbp_graph_reg_name) do
-    {:ok, %ElixirFBP.Network{graph_reg_name: fbp_graph_reg_name}}
+  def init(_args) do
+    {:ok, %ElixirFBP.Network{}}
+  end
+
+  @doc """
+  Clear (initialize) a graph in this network. If the graph's GenServer has
+  not been started and registered, do so.
+  """
+  def handle_call({:clear, graph_id, parameters}, _req, network) do
+    registered_name = HashDict.get(network.graph_reg_names, graph_id)
+    if is_nil(registered_name) do
+      {:ok, registered_name} = Graph.start_link(graph_id, parameters)
+      new_graph_reg_names =
+        HashDict.put(network.graph_reg_names, graph_id, registered_name)
+      {:reply, {:ok, registered_name},
+             %ElixirFBP.Network{network | graph_reg_names: new_graph_reg_names}}
+    else
+      Graph.set_parameters(registered_name, parameters)
+      {:reply, {:ok, registered_name}, network}
+    end
+  end
+
+  @doc """
+  Remove a graph (%ElixirFBP.Graph structure) from the networks dictionary of graphs.
+  """
+  def handle_call({:remove_graph, graph_id}, _req, network) do
+    new_graph_reg_names = HashDict.delete(network.graph_reg_names, graph_id)
+    {:reply, :ok,
+           %ElixirFBP.Network{network | graph_reg_names: new_graph_reg_names}}
   end
 
   @doc """
   Callback implementation for ElixirFBP.Network.start()
-  Starting a network involves the following steps:
-    1. Spawn all components in the graph
-    2. Send all initial data values to their respective processes.
-
   """
-  def handle_cast(:start, network) do
-    graph_reg_name = network.graph_reg_name
-    nodes = Graph.nodes(graph_reg_name)
-    # For every component in the graph:
-    #   start the process - constructing outport process id's to send to
-    Enum.each(nodes, fn (node) ->
-      {node_id, label} = Graph.get_node(graph_reg_name, node)
-      Component.start(graph_reg_name, node_id, label) end)
-    # For every component's inport, see if there is an initial value. If so,
-    # send this value to all of processes that have been spawned for this
-    # component. We do not use Component.send_ip for this type of message.
-    Enum.each(nodes, fn(node) ->
-      {node_id, label} = Graph.get_node(graph_reg_name, node)
-      inports = label.inports
-      for {port, value} <- inports do
-        if value != nil do
-          number_of_processes = label.metadata[:number_of_processes]
-          Enum.each(Range.new(1, number_of_processes), fn(process_no) ->
-            process_reg_name = String.to_atom(
-                                      Atom.to_string(graph_reg_name)
-                                      <> "_"
-                                      <> node_id
-                                      <> "_#{process_no}")
-            send(process_reg_name, {port, value})
-          end)
-        end
-      end
-    end)
-    new_network = %{network | :status => :started}
-    {:noreply, new_network}
-  end
-
-  @doc """
-  Callback implementation for ElixirFBP.Network.stop()
-  Stop the currently running graph.
-  Unregister and kill all of the node processes.
-  """
-  def handle_cast(:stop, network) do
-    graph_reg_name = network.graph_reg_name
-    nodes = Graph.nodes(graph_reg_name)
-    Enum.each(nodes, fn(node) ->
-      {node_id, label} = Graph.get_node(graph_reg_name, node)
-      Component.stop(graph_reg_name, node_id, label) end)
-    new_network = %{network | :status => :stopped}
-    {:noreply, new_network}
-  end
-
-  @doc """
-  Callback implementation for ElixirFBP.Network.data
-  """
-  def handle_cast({:data, graph_id, edge_id, src, tgt, subgraph}, network) do
-    nodes = Graph.nodes(network.graph_reg_name)
-    {:noreply, network}
+  def handle_call({:start, graph_id}, _req, network) do
+    reg_name = HashDict.get(network.graph_reg_names, graph_id)
+    Graph.start(reg_name)
+    {:reply, :ok, network}
   end
 
   @doc """
   Callback implementation for ElixirFBP.Network.get_status
   """
-  def handle_call(:get_status, _req, network) do
-    {:reply, network.status, network}
+  def handle_call({:get_status, graph_id}, _req, network) do
+    reg_name = HashDict.get(network.graph_reg_names, graph_id)
+    status = Graph.get_status(reg_name)
+    {:reply, status, network}
   end
 
   @doc """
   Callback implementation for stopping the Network - Note that this is different
   than the stop function.
   """
-  def handle_call(:stop_network, _req, network) do
-    # Stop the Graph GenServer
-    Graph.stop(network.graph_reg_name)
+  def handle_call(:stop, _req, network) do
     {:stop, :normal, :ok, network}
   end
 
+  @doc """
+  Callback implementation for ElixirFBP.Network.stop()
+  Stop the execution of a graph identified by its id (string).
+  """
+  def handle_call({:stop, graph_id}, _req, network) do
+    reg_name = HashDict.get(network.graph_reg_names, graph_id)
+    Graph.stop_graph(reg_name)
+    {:reply, :ok, network}
+  end
+
+  @doc """
+  Callback implementation for ElixirFBP.Network.data
+  """
+  def handle_cast({:data, graph_id, edge_id, src, tgt, subgraph}, network) do
+    reg_name = HashDict.get(network.graph_reg_names, graph_id)
+    nodes = Graph.nodes(reg_name)
+    {:noreply, network}
+  end
+
+  @doc """
+  Callback implmentation for having asked the GenServer to stop processing
+  """
+  def terminate(reason, network) do
+    # Stop the Graph GenServers
+    Enum.each(HashDict.values(network.graph_reg_names), fn(reg_name) ->
+      Graph.stop(reg_name)
+    end)
+    :ok
+  end
 end

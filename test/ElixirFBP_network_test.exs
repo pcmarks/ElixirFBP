@@ -3,53 +3,46 @@ defmodule ElixirFBPNetworkTest do
   alias ElixirFBP.Graph
   alias ElixirFBP.Network
 
-  @graph_1      "graph_n1"
+  @graph_1      "graph_1"
   @node_1       "node_1"
   @node_2       "node_2"
 
-  test "Create an ElixirFBP Network" do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
-    {:ok, _fbp_network_pid} =
-            Network.start_link(fbp_graph_reg_name)
-    status = Network.get_status()
-    assert status == :stopped
-    # Make sure the network is stopped?
-    Network.stop()
-    Network.stop_network()
+  test "Start and stop the FBP Network" do
+    Network.start_link
+    assert :ok == Network.stop
+  end
+
+  test "Create an ElixirFBP Graph" do
+    Network.start_link
+    {:ok, fbp_graph = Network.clear(@graph_1)}
+    status = Network.get_status(@graph_1)
+    assert status == {false, false}
+    # Make sure the graph and network are stopped
+    Network.stop(@graph_1)
+    assert :ok == Network.stop
   end
 
   test "Start an ElxirFBP Network" do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
-    Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add")
-    Graph.add_node(fbp_graph_reg_name, @node_2, "Core.Output")
+    Network.start_link
+    {:ok, fbp_graph} = Network.clear(@graph_1)
+    Graph.add_node(fbp_graph, @node_1, "Math.Add")
+    Graph.add_node(fbp_graph, @node_2, "Core.Output")
     _edge = Graph.add_edge(
-                  fbp_graph_reg_name,
+                  fbp_graph,
                   @node_1, :sum,
-                  @node_2, :in)
+                  @node_2, :in_port)
 
-    Graph.add_initial(fbp_graph_reg_name, 42, @node_1, :addend)
-    Graph.add_initial(fbp_graph_reg_name, 24, @node_1, :augend)
-    {:ok, _fbp_network_pid} =
-        Network.start_link(fbp_graph_reg_name)
-    Network.start()
-    status = Network.get_status()
-    assert status == :started
-    # Make sure the network is stopped
-    Network.stop()
-    # kill the network process
-    Network.stop_network
-  end
-
-  test "Stop an ElxirFBP Network" do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
-    {:ok, _fbp_network_pid} =
-          Network.start_link(fbp_graph_reg_name)
-    Network.start()
-    Network.stop()
-    status = Network.get_status()
-    assert status == :stopped
-    # Stop the GenServer Network process
-    Network.stop_network
+    Graph.add_initial(fbp_graph, 42, @node_1, :addend)
+    Graph.add_initial(fbp_graph, 24, @node_1, :augend)
+    Network.start(@graph_1)
+    status = Network.get_status(@graph_1)
+    assert status == {true, true}
+    # Sleep a little while to make sure the computation is finished
+    :timer.sleep(10)
+    # # Make sure the graph and network are stopped
+    Network.stop(@graph_1)
+    # # kill the network process
+    assert :ok == Network.stop
   end
 
 end

@@ -21,7 +21,7 @@ defmodule ElixirFBP.Component do
   Return the process name (string) for the spawned process root name and the number of processes
   started
   """
-  def start(graph_reg_name, node_id, label) do
+  def start(graph_reg_name, node_id, label, fbp_graph) do
     # IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
     # Retrieve the list of inports and outports for this type of component
     {inports, _} = Code.eval_string(label.component <> ".inports")
@@ -31,7 +31,7 @@ defmodule ElixirFBP.Component do
     # The outport values consists of the Elixir process name of the node it is
     # connected to along with its port name. Note that we have to prepend
     # the component name with the string "Elixir."
-    outport_args = prepare_outport_args(graph_reg_name, node_id)
+    outport_args = prepare_outport_args(graph_reg_name, node_id, fbp_graph)
     process_reg_name = Atom.to_string(graph_reg_name) <> "_" <> node_id
     module = Module.concat("Elixir", label.component)
     number_of_processes = label.metadata[:number_of_processes]
@@ -88,16 +88,16 @@ defmodule ElixirFBP.Component do
   A private function that can assemble the process id and port name that a
   component is connected to. The connection is between an outport and an inport.
   """
-  defp prepare_outport_args(graph_reg_name, node_id) do
-    fbp_graph = ElixirFBP.Graph.get(graph_reg_name)
-    out_edges = :digraph.out_edges(fbp_graph.graph, node_id)
+  defp prepare_outport_args(graph_reg_name, node_id, graph) do
+    # fbp_graph = ElixirFBP.Graph.get(graph_reg_name)
+    out_edges = :digraph.out_edges(graph, node_id)
     Enum.map(out_edges, fn(out_edge) ->
-      {_, _src_node, tgt_node, edge_label} = :digraph.edge(fbp_graph.graph, out_edge)
-      {tgt_node, node_label} = :digraph.vertex(fbp_graph.graph, tgt_node)
+      {_, _src_node, tgt_node, edge_label} = :digraph.edge(graph, out_edge)
+      {tgt_node, node_label} = :digraph.vertex(graph, tgt_node)
       number_of_processes = node_label.metadata[:number_of_processes]
       process_reg_names =
         Enum.map(Range.new(1, number_of_processes), fn(i) ->
-          process_reg_name = String.to_atom(
+          String.to_atom(
               Atom.to_string(graph_reg_name) <> "_" <> tgt_node <> "_#{i}")
         end)
       %{process_reg_names: List.to_tuple(process_reg_names),
