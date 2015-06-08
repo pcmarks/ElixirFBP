@@ -35,6 +35,20 @@ defmodule ElixirFBP.Runtime do
   end
 
   @doc """
+  Retrieve the value of the the structure part named parameter
+  """
+  def get_parameter(parameter) do
+    GenServer.call(__MODULE__, {:get_parameter, parameter})
+  end
+
+  @doc """
+  Set the value of the structure part named parameter
+  """
+  def set_parameter(parameter, value) do
+    GenServer.call(__MODULE__, {:set_parameter, parameter, value})
+  end
+
+  @doc """
   Stop a GenServer instance of an ElixirFBP.Runtime
   """
   def stop do
@@ -44,15 +58,23 @@ defmodule ElixirFBP.Runtime do
   ########################################################################
   # The GenServer implementations
   def init(parameters) do
-    runtime = %ElixirFBP.Runtime{
-      type: parameters[:type],
-      version: parameters[:version],
-      capabilites: parameters[:capabilites],
-      all_capabilities: parameters[:all_capabilites],
-      id: parameters[:id],
-      label: parameters[:label]
-      }
+    runtime = %ElixirFBP.Runtime{}
     {:ok, runtime}
+  end
+
+  @doc """
+  Callback implementation for ElixirFBP.Runtime.get_paramter()
+  """
+  def handle_call({:get_parameter, parameter}, _req, runtime) do
+    {:reply, Map.get(runtime, parameter, nil), runtime}
+  end
+
+  @doc """
+  Callback implementation for ElixirFBP.Runtime.set_paramter()
+  """
+  def handle_call({:set_parameter, parameter, value}, _req, runtime) do
+    new_runtime = Map.put(runtime, parameter, value)
+    {:reply, :ok, new_runtime}
   end
 
   @doc """
