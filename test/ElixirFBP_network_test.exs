@@ -14,7 +14,7 @@ defmodule ElixirFBPNetworkTest do
 
   test "Create an ElixirFBP Graph" do
     Network.start_link
-    {:ok, fbp_graph = Network.clear(@graph_1)}
+    {:ok, _fbp_graph = Network.clear(@graph_1)}
     status = Network.get_status(@graph_1)
     assert status == {false, false}
     # Make sure the graph and network are stopped

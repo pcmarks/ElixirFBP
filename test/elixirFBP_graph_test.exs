@@ -112,7 +112,7 @@ defmodule ElixirFBPGraphTest do
     # First add an edge
     Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add")
     Graph.add_node(fbp_graph_reg_name, @node_2, "Math.Add")
-    edge = Graph.add_edge(
+    _edge = Graph.add_edge(
                   fbp_graph_reg_name,
                   @node_1, :sum,
                   @node_2, :addend)

@@ -22,7 +22,7 @@ defmodule ElixirFBPComponentTest do
                   @node_2, :addend)
     {_node_id, label} = Graph.get_node(fbp_graph_reg_name, @node_1)
     fbp_graph = Graph.get(fbp_graph_reg_name)
-    {process_reg_name, no_of_processes} =
+    {process_reg_name, _no_of_processes} =
           Component.start(fbp_graph_reg_name, @node_1, label, fbp_graph.graph)
     assert process_reg_name == @graph_1 <> "_" <> @node_1
     # There should be at least one process with the process number suffix of "_1"

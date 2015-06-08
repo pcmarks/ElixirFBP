@@ -23,6 +23,18 @@
       </ul>
 
       
+        <section id="moduledoc" class="docstring">
+          <p>ElixirFBP is an implementation of the flow-based programming (FBP) technique.
+An FBP program is represented by a directed graph where the nodes are
+components that can receive Information Packets (IPs) via in ports and send
+IPs - typically after some computation - out the out ports.</p>
+<p>In ElixirFBP, each component is a module that must specify the names of its
+in and out ports and it must implement a loop function.</p>
+<p>An FBP program is created by adding components to an ElixrFBP.Graph. The
+graph, in turn, is kept inside and managed by an ElixirFBP.Network.</p>
+
+        </section>
+      
 
       
         <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP.ex#L1" class="view_source">Source</a>

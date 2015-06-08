@@ -7,7 +7,8 @@ defmodule Examples.Add1 do
   @node_2       "node_2"
 
   def start do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+    Network.start_link
+    {:ok, fbp_graph_reg_name} = Network.clear(@graph_1)
     # Add the components to the graph
     Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add")
     Graph.add_node(fbp_graph_reg_name, @node_2, "Core.Output")
@@ -17,8 +18,6 @@ defmodule Examples.Add1 do
     Graph.add_initial(fbp_graph_reg_name, 42, @node_1, :addend)
     Graph.add_initial(fbp_graph_reg_name, 24, @node_1, :augend)
     # Start the flow
-    {:ok, _fbp_network_pid} =
-        Network.start_link(fbp_graph_reg_name)
-    Network.start()
+    Network.start(@graph_1)
   end
 end

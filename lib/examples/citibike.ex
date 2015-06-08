@@ -17,7 +17,8 @@ defmodule Examples.Citibike do
   @output         "output"
 
   def start do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@citibike)
+    Network.start_link
+    {:ok, fbp_graph_reg_name} = Network.clear(@citibike)
     # Add the components to the graph
     Graph.add_node(fbp_graph_reg_name, @ticker, "Streamtools.Ticker")
     Graph.add_node(fbp_graph_reg_name, @map, "Streamtools.Map")
@@ -40,8 +41,6 @@ defmodule Examples.Citibike do
     Graph.add_initial(fbp_graph_reg_name, "stationName", @filter, :filter)
     Graph.add_initial(fbp_graph_reg_name, "W 41 St & 8 Ave", @filter, :filter_value)
     # Start the flow
-    {:ok, _fbp_network_pid} =
-        Network.start_link(fbp_graph_reg_name)
-    Network.start()
+    Network.start(@citibike)
   end
 end
