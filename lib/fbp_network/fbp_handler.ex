@@ -1,7 +1,7 @@
 defmodule FBPNetwork.FBPHandler do
   @moduledoc """
   FBPHandler contains functions that execute the Flow-Based Programming (FBP)
-  Network Protocol commands.
+  Network Protocol commands. For more details see [here](http://noflojs.org/documentation/protocol/)
 
   The protocol is message-based; the transport layer for the messages acts
   asynchronously. A message consists of three parts: a protocol, a command and
@@ -44,7 +44,7 @@ defmodule FBPNetwork.FBPHandler do
             #     3. the runtime is able to control and introspect its running networks using the Network
             #        protocol
             capabilities = ["protocol:component", "protocol:runtime", "protocol:network"]
-            payload = %{"version" => "0.1.0", "type" => "elixirfbp", "capabilities" => capabilities}
+            payload = %{"version" => "0.0.1", "type" => "elixir-fbp", "capabilities" => capabilities}
             %{ "command" => "runtime", "protocol" => "runtime", "payload" => payload}
         _ ->
           Logger.warn("unknown command: #{command}")

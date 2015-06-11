@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ElixirFBP.Runtime</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/elixir.css">
+  </head>
+  <body>
+    <section id="content">
+      <div class="breadcrumbs">ElixirFBP v0.0.1 &rarr; <a href="overview.html">Overview</a> &rarr; <a href="ElixirFBP.html">ElixirFBP</a> &rarr; <a href="ElixirFBP.Runtime.html">Runtime</a></div>
+      <h1>
+        ElixirFBP.Runtime
+        
+      </h1>
+
+      <ul class="summary_links">
+        
+          <li><a href="#summary">Summary</a></li>
+        
+        
+        
+          <li><a href="#functions_details">Functions</a></li>
+        
+        
+        
+      </ul>
+
+      
+        <section id="moduledoc" class="docstring">
+          <p>ElixirFBP.Runtime is a GenServer responsible for information related to the
+runtime capabilites of a particular instance of ElixirFBP. In its structure,
+it stores descriptive data, a list of capabilities and a list of components
+that may be used to construct FBP programs.</p>
+<p>Most data is loaded dynamically at GenServer start time but can be
+updated after initialization.</p>
+<p>The GenServer is registered with the name of this module.</p>
+
+        </section>
+      
+
+      
+        <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L1" class="view_source">Source</a>
+      
+
+      
+        <h2 id="summary">Summary<span class="detail_header_links"><a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a></span></h2>
+        <table class="summary">
+          <tr>
+  <td class="summary_signature"><a href="#get_parameter/1">get_parameter(parameter)</a></td>
+  
+    <td class="summary_synopsis"><p>Retrieve the value of the the structure part named parameter</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#handle_call/3">handle_call(msg, arg2, state)</a></td>
+  
+    <td class="summary_synopsis"><p>Callback implementation for ElixirFBP.Runtime.stop()</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#set_parameter/2">set_parameter(parameter, value)</a></td>
+  
+    <td class="summary_synopsis"><p>Set the value of the structure part named parameter</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#start_link/1">start_link(parameters \\ %{})</a></td>
+  
+    <td class="summary_synopsis"><p>Start a GenServer instance of an ElixirFBP.Runtime</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#stop/0">stop()</a></td>
+  
+    <td class="summary_synopsis"><p>Stop a GenServer instance of an ElixirFBP.Runtime</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#terminate/2">terminate(arg1, arg2)</a></td>
+  
+    <td class="summary_synopsis"><p>Terminate is eventually called as this GenServer is stopped</p>
+</td>
+  
+</tr>
+
+        </table>
+      
+
+      
+
+      
+        <section id="functions_details" class="details_list">
+          <h2>Functions</h2>
+          <section class="detail">
+  <div class="detail_header" id="get_parameter/1">
+    <span class="signature"><strong>get_parameter(parameter)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#get_parameter/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Retrieve the value of the the structure part named parameter</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L40" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="handle_call/3">
+    <span class="signature"><strong>handle_call(msg, arg2, state)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#handle_call/3" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Callback implementation for ElixirFBP.Runtime.stop()</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L25" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="set_parameter/2">
+    <span class="signature"><strong>set_parameter(parameter, value)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#set_parameter/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Set the value of the structure part named parameter</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L47" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="start_link/1">
+    <span class="signature"><strong>start_link(parameters \\ %{})</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#start_link/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Start a GenServer instance of an ElixirFBP.Runtime.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L33" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="stop/0">
+    <span class="signature"><strong>stop()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#stop/0" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Stop a GenServer instance of an ElixirFBP.Runtime</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L54" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="terminate/2">
+    <span class="signature"><strong>terminate(arg1, arg2)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#terminate/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Terminate is eventually called as this GenServer is stopped.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L25" class="view_source">Source</a>
+  
+</section>
+
+        </section>
+      
+
+      
+
+      
+    </section>
+
+    <!-- Scripts -->
+    <script>
+      relpath = '';
+      if (relpath != '') relpath += '/';
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/jquery.js"><\/script>')</script>
+    <script src="js/app.js"></script>
+    <script src="js/highlight.pack.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad();
+      hljs.configure({languages: []}); //disable autodetect
+      if (window.top.frames.main) { document.body.className = 'frames'; }
+    </script>
+  </body>
+</html>

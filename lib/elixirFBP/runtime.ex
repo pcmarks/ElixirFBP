@@ -57,7 +57,12 @@ defmodule ElixirFBP.Runtime do
 
   ########################################################################
   # The GenServer implementations
+  @doc """
+  Callback implementation for ElixirFBP.Runtime.start_link
+  Start up a Network and initialize the Runtime state.
+  """
   def init(parameters) do
+    network = ElixirFBP.Network.start_link
     runtime = %ElixirFBP.Runtime{}
     {:ok, runtime}
   end

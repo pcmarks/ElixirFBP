@@ -15,7 +15,7 @@ defmodule FBPNetworkTest do
     opts = nil
     message = ~s({"protocol":"runtime","command":"getruntime","payload":{"secret":"122223333"}})
     response = FBPNetwork.WsHandler.websocket_handle({:text, message}, req, opts)
-    fbp_message = ~s({"protocol":"runtime","payload":{"version":"0.1.0","type":"elixirfbp","capabilities":["protocol:component","protocol:runtime","protocol:network"]},"command":"runtime"})
+    fbp_message = ~s({"protocol":"runtime","payload":{"version":"0.0.1","type":"elixir-fbp","capabilities":["protocol:component","protocol:runtime","protocol:network"]},"command":"runtime"})
     expected = {:reply, {:text, fbp_message}, req, nil}
     assert response == expected
   end

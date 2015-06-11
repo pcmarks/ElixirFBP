@@ -18,7 +18,8 @@ defmodule ElixirFBP.Network do
 
   """
   defstruct [
-    graph_reg_names: HashDict.new # graph id => registered name
+    graph_reg_names: HashDict.new, # graph id => registered name
+    debug: false
   ]
 
   #This module's behaviour

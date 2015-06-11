@@ -10,6 +10,7 @@ defmodule FBPNetwork.WsCowboy do
       ])
       {:ok, _} = :cowboy.start_http(:http, 100, [{:port, 3579}],
                     [{:env, [{:dispatch, dispatch}]}])
+    ElixirFBP.Runtime.start_link
     FBPNetwork.WsSupervisor.start_link
   end
 
