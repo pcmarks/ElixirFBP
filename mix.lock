@@ -1,0 +1,11 @@
+%{"cowboy": {:hex, :cowboy, "1.0.0"},
+  "cowlib": {:hex, :cowlib, "1.0.1"},
+  "earmark": {:hex, :earmark, "0.1.17"},
+  "ex_doc": {:git, "git://github.com/elixir-lang/ex_doc.git", "18d9b9c101c2848e607aa4494414c2da11f8cab3", []},
+  "hackney": {:hex, :hackney, "1.1.0"},
+  "httpoison": {:hex, :httpoison, "0.6.2"},
+  "idna": {:hex, :idna, "1.0.2"},
+  "poison": {:hex, :poison, "1.4.0"},
+  "ranch": {:hex, :ranch, "1.0.0"},
+  "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.4"},
+  "timex": {:hex, :timex, "0.13.4"}}
