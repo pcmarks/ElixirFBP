@@ -47,6 +47,21 @@ defmodule ElixirFBP.Network do
   end
 
   @doc """
+  Retrieve the registered graph name if it exists. A call to clear will have created
+  and registered it.
+  """
+  def get_graph(graph_id) do
+    GenServer.call(__MODULE__, {:get_graph, graph_id})
+  end
+
+  @doc """
+  Set the network debug switch on or off
+  """
+  def set_debug(value) do
+    GenServer.call(__MODULE__, {:set_debug, value})
+  end
+
+  @doc """
   Remove a graph from this network.
   """
   def remove_graph(graph_id) do
@@ -115,6 +130,21 @@ defmodule ElixirFBP.Network do
       Graph.set_parameters(registered_name, parameters)
       {:reply, {:ok, registered_name}, network}
     end
+  end
+
+  @doc """
+  Callback implementation of ElxirFBP.Network.get_graph()
+  """
+  def handle_call({:get_graph, graph_id}, _req, network) do
+    registered_name = HashDict.get(network.graph_reg_names, graph_id)
+    {:reply, {:ok, registered_name}, network}
+  end
+
+  @doc """
+  Callback implementation of ElixirFBP.Network.set_debug()
+  """
+  def handle_call({:set_debug, value}, _req, network) when is_boolean(value) do
+    {:reply, :ok, %ElixirFBP.Network{network | debug: value}}
   end
 
   @doc """

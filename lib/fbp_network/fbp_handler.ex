@@ -130,16 +130,27 @@ defmodule FBPNetwork.FBPHandler do
     Logger.info("network: #{command} / #{inspect payload}")
     graph = Map.get(payload, "graph")
     secret = Map.get(payload, "secret")
-    {new_state, response} =
+    response =
       case command do
         "getstatus" ->
           Network.get_status(graph, secret)
+        "debug" ->
+          {:ok, registered_name} = Network.get_graph(graph)
+          if ! registered_name do
+            Network.clear(graph)
+          end
+          Network.set_debug(Map.get(payload, "enable"))
+          nil
         _ ->
           Logger.warn("Network command not handled: #{inspect command}")
-          {state, nil}
+          nil
       end
-      fbp_message = response |> Poison.Encoder.encode([]) |> IO.iodata_to_binary
-    {:reply, {:text, fbp_message}, req, new_state}
+      if response do
+        fbp_message = response |> Poison.Encoder.encode([]) |> IO.iodata_to_binary
+      else
+        fbp_message = nil
+      end
+    {:reply, {:text, fbp_message}, req, state}
   end
 
   @doc """
