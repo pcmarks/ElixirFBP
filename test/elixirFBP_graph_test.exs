@@ -61,19 +61,19 @@ defmodule ElixirFBPGraphTest do
     assert Map.fetch!(label.metadata, :number_of_processes) == 1
   end
 
-  test "Add a node with metadata" do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
-    node_id = Graph.add_node(fbp_graph_reg_name,
-                              @node_1,
-                              "Math.Add",
-                              %{number_of_processes: 4})
-    nodes = Graph.nodes(fbp_graph_reg_name)
-    assert node_id in nodes == true
-    fbp_graph = Graph.get(fbp_graph_reg_name)
-    {_node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
-    assert label.inports == [{:addend, nil}, {:augend, nil}]
-    assert Map.fetch!(label.metadata, :number_of_processes) == 4
-  end
+  # test "Add a node with metadata" do
+  #   {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+  #   node_id = Graph.add_node(fbp_graph_reg_name,
+  #                             @node_1,
+  #                             "Math.Add",
+  #                             %{number_of_processes: 4})
+  #   nodes = Graph.nodes(fbp_graph_reg_name)
+  #   assert node_id in nodes == true
+  #   fbp_graph = Graph.get(fbp_graph_reg_name)
+  #   {_node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
+  #   assert label.inports == [{:addend, nil}, {:augend, nil}]
+  #   assert Map.fetch!(label.metadata, :number_of_processes) == 4
+  # end
 
   test "Get the info associated with a node" do
     {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
