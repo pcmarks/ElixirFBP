@@ -187,6 +187,12 @@ defmodule FBPNetwork.FBPHandler do
           payload = %{"graph" => graph, "time" => start_time, "running" => true,
                       "started" => true}
           %{"protocol" => "network", "command" => "started", "payload" => payload}
+        "stop" ->
+          stop_time = :calendar.universal_time |> inspect
+          Network.stop(graph)
+          payload = %{"graph" => graph, "time" => stop_time, "running" => false,
+                      "started" => true}
+          %{"protocol" => "network", "command" => "stopped", "payload" => payload}
         "debug" ->
           {:ok, registered_name} = Network.get_graph(graph)
           if ! registered_name do
