@@ -147,7 +147,8 @@ defmodule FBPNetwork.FBPHandler do
           payload1 = %{"outPorts" => outPorts1, "inPorts" => inPorts1,
                         "name" => name1, "description" => description1}
           outPorts2 = []
-          inPorts2  = [%{"type" => "string", "id" => "out-port"}]
+          inPorts2  = [%{"type" => "string", "id" => "in_port"},
+                       %{"type" => "pid", "id" => "out_pid"}]
           name2 = "Core.Output"
           description2 = "Print the IP on the console."
           payload2 = %{"outPorts" => outPorts2, "inPorts" => inPorts2,
@@ -180,6 +181,12 @@ defmodule FBPNetwork.FBPHandler do
         "getstatus" ->
           {running, started} = Network.get_status(graph, secret)
           %{"graph" => graph, "running" => running, "started" => started}
+        "start" ->
+          start_time = :calendar.universal_time |> inspect
+          Network.start(graph)
+          payload = %{"graph" => graph, "time" => start_time, "running" => true,
+                      "started" => true}
+          %{"protocol" => "network", "command" => "started", "payload" => payload}
         "debug" ->
           {:ok, registered_name} = Network.get_graph(graph)
           if ! registered_name do

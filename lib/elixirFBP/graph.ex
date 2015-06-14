@@ -316,10 +316,11 @@ defmodule ElixirFBP.Graph do
     outports = Enum.map(component_outports, fn(outport) ->
       {elem(outport,0), nil}
       end)
+    new_metadata = Map.put(metadata, :number_of_processes, 1)
     label = %{component: component,
               inports: inports, inport_types: component_inports,
               outports: outports, outport_types: component_outports,
-              metadata: metadata}
+              metadata: new_metadata}
     new_vertex = :digraph.add_vertex(fbp_graph.graph, node_id, label)
     {:reply, new_vertex, fbp_graph}
   end
