@@ -3,8 +3,8 @@ defmodule Math.Add do
   This module describes an FBP Component: Math.Add
   """
   def description, do: "Add two integers"
-  def inports, do: [addend: nil, augend: nil]
-  def outports, do: [sum: nil]
+  def inports, do: [addend: :integer, augend: :integer]
+  def outports, do: [sum: :integer]
 
   def loop(augend, addend, sum) do
     # IO.puts("Math.Add.loop(#{inspect augend},#{inspect addend}, #{inspect sum})")

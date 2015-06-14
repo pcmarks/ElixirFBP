@@ -6,8 +6,8 @@ defmodule Streamtools.Ticker do
   use Timex
   alias ElixirFBP.Component
 
-  def inports, do: [interval: nil]
-  def outports, do: [out: nil]
+  def inports, do: [interval: :integer]
+  def outports, do: [out: :string]
 
   def loop(interval, out) do
     receive do

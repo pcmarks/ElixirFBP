@@ -4,8 +4,8 @@ defmodule Streamtools.GetHTTPJSON do
   """
   alias ElixirFBP.Component
 
-  def inports, do: [path: nil]
-  def outports, do: [out: nil]
+  def inports, do: [path: :string]
+  def outports, do: [out: :string]
 
   def loop(path, out) do
     receive do

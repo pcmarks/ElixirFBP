@@ -10,9 +10,12 @@ defmodule ElixirFBP.Graph do
   Graphs are implemented using Erlang's digraph library.
 
   The digraph Label associated with a node (digraph vertex) is
-  [component, inports, outports, metadata] where component is the string name
-  of a component - tentatively: "Module", e.g., "Math.Add". inports
-  and outports are lists of atomic name, initial value pairs, e.g., {:augend, 2}.
+  [component, inports, inport_types, outports, outport_types, metadata] where
+  component is the string name
+  of a component e.g., "Math.Add". inports
+  and outports are lists of atomic name, initial value pairs, e.g., {:augend, 2} and
+  inport_types and outport_types are lists of atomic name, type, e.g., {:augend, :integer}.
+
   Initial values can be set using the graph add_initial command.
 
   The digraph Label associated with an edge is [src.port,, tgt.port, metadata] where src.port
@@ -303,9 +306,20 @@ defmodule ElixirFBP.Graph do
   Callback implementation for ElixirFBP.Graph.add_node()
   """
   def handle_call({:add_node, node_id, component, metadata}, _req, fbp_graph) do
-    inports = elem(Code.eval_string(component <> ".inports"), 0)
-    outports = elem(Code.eval_string(component <> ".outports"), 0)
-    label = %{component: component, inports: inports, outports: outports, metadata: metadata}
+    component_inports = elem(Code.eval_string(component <> ".inports"), 0)
+    component_outports = elem(Code.eval_string(component <> ".outports"), 0)
+    # Construct a list of port name, value pairs that will be used to hold
+    # initial values.
+    inports = Enum.map(component_inports, fn(inport) ->
+      {elem(inport,0), nil}
+      end)
+    outports = Enum.map(component_outports, fn(outport) ->
+      {elem(outport,0), nil}
+      end)
+    label = %{component: component,
+              inports: inports, inport_types: component_inports,
+              outports: outports, outport_types: component_outports,
+              metadata: metadata}
     new_vertex = :digraph.add_vertex(fbp_graph.graph, node_id, label)
     {:reply, new_vertex, fbp_graph}
   end
@@ -351,10 +365,12 @@ defmodule ElixirFBP.Graph do
   def handle_call({:add_initial, data, node_id, port, metadata}, _req, fbp_graph) do
     {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
     inports = label.inports
-    new_inports = Keyword.put(inports, port, data)
+    inport_types = label.inport_types
+    initial_value = convert_to_type(inport_types[port], data)
+    new_inports = Keyword.put(inports, port, initial_value)
     new_label = %{label | :inports => new_inports}
     :digraph.add_vertex(fbp_graph.graph, node_id, new_label)
-    {:reply, data, fbp_graph}
+    {:reply, initial_value, fbp_graph}
   end
 
   @doc """
@@ -397,5 +413,15 @@ defmodule ElixirFBP.Graph do
   """
   def terminate(reason, fbp_graph) do
     :ok
+  end
+
+  defp convert_to_type(:integer, data) when is_bitstring(data) do
+    String.to_integer(data)
+  end
+  defp convert_to_type(:integer, data) when is_integer(data) do
+    data
+  end
+  defp convert_to_type(:string, data) when is_bitstring(data) do
+    data
   end
 end

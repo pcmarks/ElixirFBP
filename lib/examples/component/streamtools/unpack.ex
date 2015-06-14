@@ -4,8 +4,8 @@ defmodule Streamtools.Unpack do
   """
   alias ElixirFBP.Component
 
-  def inports, do: [part: nil, in_port: nil]
-  def outports, do: [out: nil]
+  def inports, do: [part: :string, in_port: :string]
+  def outports, do: [out: :string]
 
   def loop(part, in_port, out) do
     receive do

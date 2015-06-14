@@ -124,10 +124,22 @@ defmodule ElixirFBPGraphTest do
     assert result == true
   end
 
-  test "Add an initial value to a node port" do
+  test "Add an initial value to a node port without conversion" do
     {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
     Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add")
     result = Graph.add_initial(fbp_graph_reg_name, 27, @node_1, :addend)
+    assert result == 27
+    fbp_graph = Graph.get(fbp_graph_reg_name)
+    {_node_id, label} = :digraph.vertex(fbp_graph.graph, @node_1)
+    inports = label.inports
+    port_value = inports[:addend]
+    assert port_value == 27
+  end
+
+  test "Add an initial value to a node port with conversion" do
+    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+    Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add")
+    result = Graph.add_initial(fbp_graph_reg_name, "27", @node_1, :addend)
     assert result == 27
     fbp_graph = Graph.get(fbp_graph_reg_name)
     {_node_id, label} = :digraph.vertex(fbp_graph.graph, @node_1)

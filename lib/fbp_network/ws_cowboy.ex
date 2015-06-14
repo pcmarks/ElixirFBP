@@ -8,7 +8,7 @@ defmodule FBPNetwork.WsCowboy do
         {"/static/[...]", :cowboy_static, {:priv_dir, :ws_cowboy, "static"}}
         ]}
       ])
-      {:ok, _} = :cowboy.start_http(:http, 100, [{:port, 3579}],
+      {:ok, _} = :cowboy.start_http(:http, 100, [{:port, 3569}],
                     [{:env, [{:dispatch, dispatch}]}])
     FBPNetwork.WsSupervisor.start_link
     ElixirFBP.Runtime.start_link

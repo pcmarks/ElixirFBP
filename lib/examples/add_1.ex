@@ -15,7 +15,7 @@ defmodule Examples.Add1 do
     # Connect the components
     Graph.add_edge(fbp_graph_reg_name, @node_1, :sum, @node_2, :in_port)
     # Initialization
-    Graph.add_initial(fbp_graph_reg_name, 42, @node_1, :addend)
+    Graph.add_initial(fbp_graph_reg_name, "42", @node_1, :addend)
     Graph.add_initial(fbp_graph_reg_name, 24, @node_1, :augend)
     # Start the flow
     Network.start(@graph_1)

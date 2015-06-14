@@ -4,8 +4,8 @@ defmodule Streamtools.Filter do
   """
   alias ElixirFBP.Component
 
-  def inports, do: [filter: nil, filter_value: nil, in_port: nil]
-  def outports, do: [out: nil]
+  def inports, do: [filter: :string, filter_value: :string, in_port: :string]
+  def outports, do: [out: :string]
 
   def loop(filter, filter_value, in_port, out) do
     receive do

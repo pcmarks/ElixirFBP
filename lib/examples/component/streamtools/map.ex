@@ -4,8 +4,8 @@ defmodule Streamtools.Map do
   """
   alias ElixirFBP.Component
 
-  def inports, do: [in_port: nil, map: nil]
-  def outports, do: [out: nil]
+  def inports, do: [in_port: :string, map: :string]
+  def outports, do: [out: :string]
 
   def loop(in_port, map, out) do
     receive do
