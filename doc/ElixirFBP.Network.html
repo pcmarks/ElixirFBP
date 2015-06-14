@@ -66,7 +66,15 @@ but here it is implemented as a network command because it seems like a better f
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#get_status/1">get_status(graph_id)</a></td>
+  <td class="summary_signature"><a href="#get_graph/1">get_graph(graph_id)</a></td>
+  
+    <td class="summary_synopsis"><p>Retrieve the registered graph name if it exists. A call to clear will have created
+and registered it</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#get_status/2">get_status(graph_id, secret \\ nil)</a></td>
   
     <td class="summary_synopsis"><p>Get the current status of a graph</p>
 </td>
@@ -99,6 +107,13 @@ Initialize the state - no graphs. There are no initialization args</p>
   <td class="summary_signature"><a href="#remove_graph/1">remove_graph(graph_id)</a></td>
   
     <td class="summary_synopsis"><p>Remove a graph from this network</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#set_debug/1">set_debug(value)</a></td>
+  
+    <td class="summary_synopsis"><p>Set the network debug switch on or off</p>
 </td>
   
 </tr>
@@ -162,7 +177,7 @@ but here it is implemented as a network command because it seems like a better f
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L44" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L45" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -180,15 +195,34 @@ but here it is implemented as a network command because it seems like a better f
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L79" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L95" class="view_source">Source</a>
   
 </section>
 <section class="detail">
-  <div class="detail_header" id="get_status/1">
-    <span class="signature"><strong>get_status(graph_id)</strong></span>
+  <div class="detail_header" id="get_graph/1">
+    <span class="signature"><strong>get_graph(graph_id)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
-      <a href="#get_status/1" class="detail_link" title="Link to this function">#</a>
+      <a href="#get_graph/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Retrieve the registered graph name if it exists. A call to clear will have created
+and registered it.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L53" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="get_status/2">
+    <span class="signature"><strong>get_status(graph_id, secret \\ nil)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#get_status/2" class="detail_link" title="Link to this function">#</a>
       <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
     </div>
   </div>
@@ -198,7 +232,7 @@ but here it is implemented as a network command because it seems like a better f
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L72" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L88" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -217,7 +251,7 @@ Stop the execution of a graph identified by its id (string).</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L25" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L26" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -235,7 +269,7 @@ Stop the execution of a graph identified by its id (string).</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L25" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L26" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -254,7 +288,7 @@ Initialize the state - no graphs. There are no initialization args.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L25" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L26" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -272,7 +306,25 @@ Initialize the state - no graphs. There are no initialization args.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L51" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L67" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="set_debug/1">
+    <span class="signature"><strong>set_debug(value)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#set_debug/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Set the network debug switch on or off</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L60" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -290,7 +342,7 @@ Initialize the state - no graphs. There are no initialization args.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L58" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L74" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -308,7 +360,7 @@ Initialize the state - no graphs. There are no initialization args.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L36" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L37" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -326,7 +378,7 @@ Initialize the state - no graphs. There are no initialization args.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L86" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L102" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -344,7 +396,7 @@ Initialize the state - no graphs. There are no initialization args.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L65" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L81" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -362,7 +414,7 @@ Initialize the state - no graphs. There are no initialization args.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L25" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/network.ex#L26" class="view_source">Source</a>
   
 </section>
 

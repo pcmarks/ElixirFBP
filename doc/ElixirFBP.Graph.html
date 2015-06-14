@@ -37,10 +37,12 @@ the creation, deletion, and modification of nodes and edges. Initial Information
 Packets (IIP’s) can also be specified.</p>
 <p>Graphs are implemented using Erlang’s digraph library.</p>
 <p>The digraph Label associated with a node (digraph vertex) is
-[component, inports, outports, metadata] where component is the string name
-of a component - tentatively: “Module”, e.g., “Math.Add”. inports
-and outports are lists of atomic name, initial value pairs, e.g., {:augend, 2}.
-Initial values can be set using the graph add_initial command.</p>
+[component, inports, inport_types, outports, outport_types, metadata] where
+component is the string name
+of a component e.g., “Math.Add”. inports
+and outports are lists of atomic name, initial value pairs, e.g., {:augend, 2} and
+inport_types and outport_types are lists of atomic name, type, e.g., {:augend, :integer}.</p>
+<p>Initial values can be set using the graph add_initial command.</p>
 <p>The digraph Label associated with an edge is [src.port,, tgt.port, metadata] where src.port
 and tgt.port are atom values for the component’s ports.</p>
 <p>Functions supported by this module are based on NoFlo’s FBP Network Protocol,
@@ -233,7 +235,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L147" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L150" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -251,7 +253,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L168" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L171" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -269,7 +271,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L132" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L135" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -287,7 +289,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L125" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L128" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -305,7 +307,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L97" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L100" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -323,7 +325,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L118" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L121" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -341,7 +343,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L104" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L107" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -359,7 +361,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L55" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L58" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -378,7 +380,7 @@ Create and initialize the FBP Graph Structure which becomes the State</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L55" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L58" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -396,7 +398,7 @@ Create and initialize the FBP Graph Structure which becomes the State</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L111" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L114" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -414,7 +416,7 @@ Create and initialize the FBP Graph Structure which becomes the State</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L158" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L161" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -433,7 +435,7 @@ the value nil.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L176" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L179" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -451,7 +453,7 @@ the value nil.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L140" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L143" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -469,7 +471,7 @@ the value nil.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L75" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L78" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -487,7 +489,7 @@ the value nil.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L82" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L85" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -506,7 +508,7 @@ graph_id - converted to an atom.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L64" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L67" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -524,7 +526,7 @@ graph_id - converted to an atom.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L183" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L186" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -543,7 +545,7 @@ This should normally be called via the Network.stop(graph_id) function.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L90" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L93" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -561,7 +563,7 @@ This should normally be called via the Network.stop(graph_id) function.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L55" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L58" class="view_source">Source</a>
   
 </section>
 

@@ -38,6 +38,9 @@
           <tr>
   <td class="summary_signature"><a href="#init/3">init(arg1, req, opts)</a></td>
   
+    <td class="summary_synopsis"><p>By returning :upgrade we cause Cowboy to switch to web socket mode</p>
+</td>
+  
 </tr>
 <tr>
   <td class="summary_signature"><a href="#websocket_handle/3">websocket_handle(arg1, req, state)</a></td>
@@ -56,7 +59,8 @@
 <tr>
   <td class="summary_signature"><a href="#websocket_init/3">websocket_init(transport_name, req, opts)</a></td>
   
-    <td class="summary_synopsis"><p>Callback implementation for <code class="inline">c::cowboy_websocket_handler.websocket_init/3</code></p>
+    <td class="summary_synopsis"><p>Called just before switching to websocket mode. Here we have a chance
+to create state</p>
 </td>
   
 </tr>
@@ -87,10 +91,11 @@
   </div>
   
   <section class="docstring">
-    
+    <p>By returning :upgrade we cause Cowboy to switch to web socket mode</p>
+
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L7" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L10" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -108,7 +113,7 @@
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L16" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L23" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -126,7 +131,7 @@
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L30" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L37" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -140,11 +145,12 @@
   </div>
   
   <section class="docstring">
-    <p>Callback implementation for <code class="inline">c::cowboy_websocket_handler.websocket_init/3</code>.</p>
+    <p>Called just before switching to websocket mode. Here we have a chance
+to create state</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L11" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L18" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -162,7 +168,7 @@
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L34" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L41" class="view_source">Source</a>
   
 </section>
 
