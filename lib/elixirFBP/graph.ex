@@ -424,4 +424,7 @@ defmodule ElixirFBP.Graph do
   defp convert_to_type(:string, data) when is_bitstring(data) do
     data
   end
+  defp convert_to_type(:pid, data) when is_pid(data) do
+    data
+  end
 end

@@ -12,7 +12,7 @@ defmodule Examples.Fbptest01Mp do
   @node_3       "recvr"
 
   def start do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+    {:ok, fbp_graph_reg_name} = Network.clear(@graph_1)
     # Add the components to the graph
     Graph.add_node(fbp_graph_reg_name, @node_1, "Jsfbp.Sender",
                    %{number_of_processes: 1})
@@ -24,8 +24,6 @@ defmodule Examples.Fbptest01Mp do
     # Initialization
     Graph.add_initial(fbp_graph_reg_name, 1_000, @node_1, :COUNT)
     # Start the flow
-    {:ok, _fbp_network_pid} =
-        Network.start_link(fbp_graph_reg_name)
-    Network.start()
+    Network.start(@graph_1)
   end
 end

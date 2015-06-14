@@ -11,7 +11,7 @@ defmodule Examples.Fbptest02 do
   @node_3       "recvr"
 
   def start do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+    {:ok, fbp_graph_reg_name} = Network.clear(@graph_1)
     # Add the components to the graph
     Graph.add_node(fbp_graph_reg_name, @node_1, "Jsfbp.Reader")
     Graph.add_node(fbp_graph_reg_name, @node_2, "Jsfbp.Copier")
@@ -24,14 +24,11 @@ defmodule Examples.Fbptest02 do
     Graph.add_initial(fbp_graph_reg_name, "lib/examples/data/text.txt", @node_1, :FILE)
     Graph.add_initial(fbp_graph_reg_name, self(), @node_3, :OUT)
     # Start the flow
-    {:ok, _fbp_network_pid} =
-        Network.start_link(fbp_graph_reg_name)
-    Network.start()
+    Network.start(@graph_1)
     receive do
       message ->
         IO.puts("All done! with message #{message}")
         Network.stop
-        Network.stop_network
     end
   end
 

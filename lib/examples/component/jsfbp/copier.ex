@@ -4,8 +4,8 @@ defmodule Jsfbp.Copier do
   """
   alias ElixirFBP.Component
 
-  def inports,  do: [IN: nil]
-  def outports, do: [OUT: nil]
+  def inports,  do: [IN: :string]
+  def outports, do: [OUT: :string]
 
   def loop(in_port, out) do
     receive do

@@ -4,8 +4,8 @@ defmodule Jsfbp.Sender do
   """
   alias ElixirFBP.Component
 
-  def inports,  do: [COUNT: nil]
-  def outports, do: [OUT: nil]
+  def inports,  do: [COUNT: :integer]
+  def outports, do: [OUT: :integer]
 
   def loop(last, out) do
     receive do

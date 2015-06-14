@@ -15,7 +15,7 @@ defmodule Examples.Fbptestv1Multi do
   @no_of_messages_def   1_000
 
   def start(no_of_messages \\ @no_of_messages_def, no_of_processes \\ @no_of_processes_def) do
-    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+    {:ok, fbp_graph_reg_name} = Network.clear(@graph_1)
     # Add the components to the graph
     Graph.add_node(fbp_graph_reg_name, @sender, "Jsfbp.Sender")
     Graph.add_node(fbp_graph_reg_name, @faker, "Jsfbp.Faker",
@@ -29,14 +29,11 @@ defmodule Examples.Fbptestv1Multi do
     Graph.add_initial(fbp_graph_reg_name, no_of_messages, @sender, :COUNT)
     Graph.add_initial(fbp_graph_reg_name, self(), @disc, :OUT)
     # Start the flow
-    {:ok, _fbp_network_pid} =
-        Network.start_link(fbp_graph_reg_name)
-    Network.start()
+    Network.start(@graph_1)
     receive do
       message ->
         IO.puts("All done with message #{message}")
         Network.stop
-        Network.stop_network
     end
   end
 

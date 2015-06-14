@@ -6,7 +6,7 @@ defmodule Jsfbp.Recvr do
   """
   @nodata_time    5_000
 
-  def inports,  do: [IN: nil, OUT: nil]
+  def inports,  do: [IN: :string, OUT: :pid]
   def outports, do: []
 
   def loop(in_port, out_pid) do

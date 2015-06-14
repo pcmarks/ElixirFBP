@@ -3,7 +3,7 @@ defmodule Jsfbp.Discard do
   ElixirFBP implementation of a JSFBP component: https://github.com/jpaulm/jsfbp
   """
 
-  def inports,  do: [IN: nil, OUT: nil]
+  def inports,  do: [IN: :string, OUT: :pid]
   def outports, do: []
 
   def loop(in_port, out_pid) do

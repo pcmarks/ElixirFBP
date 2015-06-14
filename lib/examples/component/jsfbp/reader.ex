@@ -4,8 +4,8 @@ defmodule Jsfbp.Reader do
   """
   alias ElixirFBP.Component
 
-  def inports,  do: [FILE: nil]
-  def outports, do: [OUT: nil]
+  def inports,  do: [FILE: :string]
+  def outports, do: [OUT: :string]
 
   def loop(_file, out) do
     receive do
