@@ -83,15 +83,41 @@ defmodule FBPNetwork.FBPHandler do
       case command do
         "addnode" ->
           %{"id" => id, "component" => component, "metadata" => metadata,
-            "graph" => graph} = payload
-          {Network.add_node(state, graph, id, component, metadata), nil}
+            "graph" => graph_id} = payload
+          graph_reg_name = get_graph_registered_name(graph_id)
+          Graph.add_node(graph_reg_name, id, component, metadata)
+          {state, nil}
+        "removenode" ->
+          %{"id" => id, "graph" => graph_id} = payload
+          graph_reg_name = get_graph_registered_name(graph_id)
+          Graph.remove_node(graph_reg_name, id)
+          {state, nil}
         "addinitial" ->
-          %{"src" => src, "tgt" => tgt, "graph" => graph} = payload
-          Network.add_initial(state, graph, src, tgt)
-          nil
+          %{"src" => src, "tgt" => tgt, "graph" => graph_id} = payload
+          %{"data" => data} = src
+          %{"node" => node_id, "port" => port} = tgt
+          graph_reg_name = get_graph_registered_name(graph_id)
+          Graph.add_initial(graph_reg_name, data, node_id, String.to_atom(port))
+          {state, nil}
+        "addedge" ->
+          %{"src" => src, "tgt" => tgt, "graph" => graph_id} = payload
+          %{"node" => src_node, "port" => src_port} = src
+          %{"node" => tgt_node, "port" => tgt_port} = tgt
+          graph_reg_name = get_graph_registered_name(graph_id)
+          Graph.add_edge(graph_reg_name, src_node, String.to_atom(src_port),
+                                          tgt_node, String.to_atom(tgt_port))
+          {state, nil}
+        "removeedge" ->
+          %{"src" => src, "tgt" => tgt, "graph" => graph_id} = payload
+          %{"node" => src_node, "port" => src_port} = src
+          %{"node" => tgt_node, "port" => tgt_port} = tgt
+          graph_reg_name = get_graph_registered_name(graph_id)
+          Graph.remove_edge(graph_reg_name, src_node, String.to_atom(src_port),
+                                          tgt_node, String.to_atom(tgt_port))
+          {state, nil}
         _ ->
           Logger.warn("Graph command not handled: #{inspect command}")
-          nil
+          {state, nil}
       end
     fbp_message = response |> Poison.Encoder.encode([]) |> IO.iodata_to_binary
     {:reply, {:text, fbp_message}, req, new_state}
@@ -106,21 +132,40 @@ defmodule FBPNetwork.FBPHandler do
   def fbp_handle("component", command, payload, req, state) do
     Logger.info("component: #{command} / #{inspect payload}")
     secret = Map.get(payload, "secret")
-    response =
+    responses =
       case command do
         "list" ->
-          outPorts = [%{"type" => "integer", "id" => "out"}]
-          inPorts  = [%{"type" => "integer", "id" => "in"}]
-          name = "ElixirFBP.IncrementByOne"
-          description = "Increment by one in Elixir!"
-          payload = %{"outPorts" => outPorts, "inPorts" => inPorts, "name" => name, "description" => description}
-          %{"protocol" => "component", "command" => "component", "payload" => payload}
+          #################
+          # The following components are hardwired.
+          # ToDo: Subsequent releases will locate all components
+          #################
+          outPorts1 = [%{"type" => "integer", "id" => "sum"}]
+          inPorts1  = [%{"type" => "integer", "id" => "addend"},
+                      %{"type" => "integer", "id" => "augend"}]
+          name1 = "Math.Add"
+          description1 = "Add two integers in Elixir."
+          payload1 = %{"outPorts" => outPorts1, "inPorts" => inPorts1,
+                        "name" => name1, "description" => description1}
+          outPorts2 = []
+          inPorts2  = [%{"type" => "string", "id" => "out-port"}]
+          name2 = "Core.Output"
+          description2 = "Print the IP on the console."
+          payload2 = %{"outPorts" => outPorts2, "inPorts" => inPorts2,
+                        "name" => name2, "description" => description2}
+          [%{"protocol" => "component", "command" => "component", "payload" => payload1},
+           %{"protocol" => "component", "command" => "component", "payload" => payload2}]
         _ ->
           Logger.warn("Component command not handled: #{inspect command}")
           nil
       end
-    fbp_message = response |> Poison.Encoder.encode([]) |> IO.iodata_to_binary
-    {:reply, {:text, fbp_message}, req, state}
+    if responses != nil do
+      fbp_message = Enum.map(responses, fn(response) ->
+        {:text, response |> Poison.Encoder.encode([]) |> IO.iodata_to_binary}
+      end)
+    else
+      fbp_message = nil
+    end
+    {:reply, fbp_message, req, state}
   end
 
   @doc """
@@ -133,7 +178,8 @@ defmodule FBPNetwork.FBPHandler do
     response =
       case command do
         "getstatus" ->
-          Network.get_status(graph, secret)
+          {running, started} = Network.get_status(graph, secret)
+          %{"graph" => graph, "running" => running, "started" => started}
         "debug" ->
           {:ok, registered_name} = Network.get_graph(graph)
           if ! registered_name do
@@ -148,7 +194,7 @@ defmodule FBPNetwork.FBPHandler do
       if response do
         fbp_message = response |> Poison.Encoder.encode([]) |> IO.iodata_to_binary
       else
-        fbp_message = nil
+        fbp_message = ""
       end
     {:reply, {:text, fbp_message}, req, state}
   end
@@ -159,4 +205,14 @@ defmodule FBPNetwork.FBPHandler do
   def fbp_handle(protocol, _command, _payload, _req, _state) do
     {:error, "unknown protocol: #{inspect protocol}"}
   end
+
+
+  defp get_graph_registered_name(graph_id) do
+    {:ok, graph_reg_name} = Network.get_graph(graph_id)
+    if graph_reg_name == nil do
+      {:ok, graph_reg_name} = Network.clear(graph_id)
+    end
+    graph_reg_name
+  end
+
 end

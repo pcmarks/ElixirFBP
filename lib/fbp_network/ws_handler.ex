@@ -4,10 +4,17 @@ defmodule FBPNetwork.WsHandler do
 
   @behaviour :cowboy_websocket_handler
 
+  @doc """
+  By returning :upgrade we cause Cowboy to switch to web socket mode
+  """
   def init({:tcp, :http}, _req, _opts) do
     {:upgrade, :protocol, :cowboy_websocket}
   end
 
+  @doc """
+  Called just before switching to websocket mode. Here we have a chance
+  to create state
+  """
   def websocket_init(_transport_name, req, _opts) do
     state = HashDict.new()
     {:ok, req, state}

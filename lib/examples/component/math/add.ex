@@ -2,6 +2,7 @@ defmodule Math.Add do
   @moduledoc """
   This module describes an FBP Component: Math.Add
   """
+  def description, do: "Add two integers"
   def inports, do: [addend: nil, augend: nil]
   def outports, do: [sum: nil]
 

@@ -85,8 +85,8 @@ defmodule ElixirFBP.Network do
   @doc """
   Get the current status of a graph
   """
-  def get_status(graph_id) do
-    GenServer.call(__MODULE__, {:get_status, graph_id})
+  def get_status(graph_id, secret \\ nil) do
+    GenServer.call(__MODULE__, {:get_status, graph_id, secret})
   end
 
   @doc """
@@ -168,7 +168,7 @@ defmodule ElixirFBP.Network do
   @doc """
   Callback implementation for ElixirFBP.Network.get_status
   """
-  def handle_call({:get_status, graph_id}, _req, network) do
+  def handle_call({:get_status, graph_id, _secret}, _req, network) do
     reg_name = HashDict.get(network.graph_reg_names, graph_id)
     status = Graph.get_status(reg_name)
     {:reply, status, network}

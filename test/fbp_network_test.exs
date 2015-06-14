@@ -28,7 +28,7 @@ defmodule FBPNetworkTest do
     Network.start_link
     message = ~s({"protocol":"network","command":"debug","payload":{"graph": "foobar", "enable": true, "secret":"122223333"}})
     response = FBPNetwork.WsHandler.websocket_handle({:text, message}, req, opts)
-    expected = {:reply, {:text, nil}, req, nil}
+    expected = {:reply, {:text, ""}, req, nil}
     assert response == expected
   end
 end

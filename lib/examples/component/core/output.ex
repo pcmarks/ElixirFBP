@@ -1,5 +1,6 @@
 defmodule Core.Output do
 
+  def description, do: "Show the IP in the Console"
   def inports, do: [in_port: nil, out_pid: nil]
   def outports, do: []
 
