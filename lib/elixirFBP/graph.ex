@@ -236,8 +236,8 @@ defmodule ElixirFBP.Graph do
     #   start the process - constructing outport process id's to send to
     Enum.each(nodes, fn (node) ->
       {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
-    # For every component's inport, see if there is an initial value. If so,
       ElixirFBP.Component.start(reg_name, node_id, label, fbp_graph.graph) end)
+    # For every component's inport, see if there is an initial value. If so,
     # send this value to all of processes that have been spawned for this
     # component. We do not use Component.send_ip for this type of message.
     Enum.each(nodes, fn(node) ->
@@ -367,11 +367,18 @@ defmodule ElixirFBP.Graph do
     {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
     inports = label.inports
     inport_types = label.inport_types
-    initial_value = convert_to_type(inport_types[port], data)
-    new_inports = Keyword.put(inports, port, initial_value)
-    new_label = %{label | :inports => new_inports}
-    :digraph.add_vertex(fbp_graph.graph, node_id, new_label)
-    {:reply, initial_value, fbp_graph}
+    message = case convert_to_type(inport_types[port], data) do
+      {:error, what} ->
+        payload = %{"message" => "#{what}: #{inspect data}"}
+        %{"protocol" => "network", "command" => "error",
+                  "payload" => payload }
+      initial_value ->
+        new_inports = Keyword.put(inports, port, initial_value)
+        new_label = %{label | :inports => new_inports}
+        :digraph.add_vertex(fbp_graph.graph, node_id, new_label)
+        nil
+    end
+    {:reply, message, fbp_graph}
   end
 
   @doc """
@@ -417,8 +424,12 @@ defmodule ElixirFBP.Graph do
   end
 
   defp convert_to_type(:integer, data) when is_bitstring(data) do
-    String.to_integer(data)
+    case Integer.parse(data) do
+      {value, _} -> value
+      :error -> {:error, "Invalid integer"}
+    end
   end
+
   defp convert_to_type(:integer, data) when is_integer(data) do
     data
   end

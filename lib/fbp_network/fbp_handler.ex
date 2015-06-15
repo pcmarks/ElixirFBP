@@ -97,8 +97,8 @@ defmodule FBPNetwork.FBPHandler do
           %{"data" => data} = src
           %{"node" => node_id, "port" => port} = tgt
           graph_reg_name = get_graph_registered_name(graph_id)
-          Graph.add_initial(graph_reg_name, data, node_id, String.to_atom(port))
-          {state, nil}
+          message = Graph.add_initial(graph_reg_name, data, node_id, String.to_atom(port))
+          {state, message}
         "addedge" ->
           %{"src" => src, "tgt" => tgt, "graph" => graph_id} = payload
           %{"node" => src_node, "port" => src_port} = src
@@ -179,6 +179,10 @@ defmodule FBPNetwork.FBPHandler do
     response =
       case command do
         "getstatus" ->
+          {:ok, registered_name} = Network.get_graph(graph)
+          if ! registered_name do
+            Network.clear(graph)
+          end
           {running, started} = Network.get_status(graph, secret)
           %{"graph" => graph, "running" => running, "started" => started}
         "start" ->
