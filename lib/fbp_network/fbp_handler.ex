@@ -173,7 +173,8 @@ defmodule FBPNetwork.FBPHandler do
           payload2 = %{"outPorts" => outPorts2, "inPorts" => inPorts2,
                         "name" => name2, "description" => description2}
           [%{"protocol" => "component", "command" => "component", "payload" => payload1},
-           %{"protocol" => "component", "command" => "component", "payload" => payload2}]
+           %{"protocol" => "component", "command" => "component", "payload" => payload2},
+           %{"protocol" => "component", "command" => "componentsready", "payload" => "2"}]
         _ ->
           Logger.warn("Component command not handled: #{inspect command}")
           nil
