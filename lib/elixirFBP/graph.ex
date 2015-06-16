@@ -132,16 +132,39 @@ defmodule ElixirFBP.Graph do
   @doc """
   Add a node to the FBP Graph. Note the number of default processes is 1.
   """
-  def add_node(fbp_graph_reg_name, node_id, component,
-               metadata \\ %{:number_of_processes => 1}) do
+  def add_node(fbp_graph_reg_name, node_id, component, metadata \\ %{}) do
+    if ! Map.has_key?(metadata, :number_of_processes) do
+      metadata = Map.merge(metadata, %{:number_of_processes => 1})
+    end
     GenServer.call(fbp_graph_reg_name, {:add_node, node_id, component, metadata})
   end
 
   @doc """
-  Remove a node from the FBP Graph
+  Remove a node from an FBP Graph
   """
   def remove_node(fbp_graph_reg_name, node_id) do
     GenServer.call(fbp_graph_reg_name, {:remove_node, node_id})
+  end
+
+  @doc """
+  Rename a node in an FBP Graph
+  """
+  def rename_node(fbp_graph_reg_name,
+                  from,
+                  to,
+                  secret) do
+    GenServer.call(fbp_graph_reg_name,
+          {:rename_node, from, to, secret})
+  end
+
+  @doc """
+  Change the metadata associated with a node in a graph
+  """
+  def change_node(fbp_graph_reg_name,
+                  node_id,
+                  metadata,
+                  secret) do
+    GenServer.call(fbp_graph_reg_name, {:change_node, node_id, metadata, secret})
   end
 
   @doc """
@@ -316,11 +339,10 @@ defmodule ElixirFBP.Graph do
     outports = Enum.map(component_outports, fn(outport) ->
       {elem(outport,0), nil}
       end)
-    new_metadata = Map.put(metadata, :number_of_processes, 1)
     label = %{component: component,
               inports: inports, inport_types: component_inports,
               outports: outports, outport_types: component_outports,
-              metadata: new_metadata}
+              metadata: metadata}
     new_vertex = :digraph.add_vertex(fbp_graph.graph, node_id, label)
     {:reply, new_vertex, fbp_graph}
   end
@@ -331,6 +353,28 @@ defmodule ElixirFBP.Graph do
   def handle_call({:remove_node, node_id}, _req, fbp_graph) do
     result = :digraph.del_vertex(fbp_graph.graph, node_id)
     {:reply, result, fbp_graph}
+  end
+
+  @doc """
+  Callback implementation for ElixirFBP.Graph.rename_node()
+  """
+  def handle_call({:rename_node, from, to, secret}, _req, fbp_graph) do
+    {vertex, label} = :digraph.vertex(fbp_graph.graph, from)
+    new_vertex = :digraph.add_vertex(fbp_graph.graph, to, label)
+    :digraph.del_vertex(fbp_graph.graph, from)
+    {:reply, new_vertex, fbp_graph}
+  end
+
+  @doc """
+  Callback implementation for ElixirFBP.Graph.change_node()
+  """
+  def handle_call({:change_node, id, metadata, secret}, _req, fbp_graph) do
+    {vertex, label} = :digraph.vertex(fbp_graph.graph, id)
+    current_metadata = label.metadata
+    new_metadata = Map.merge(current_metadata, metadata)
+    new_label = %{label | :metadata => new_metadata}
+    new_vertex = :digraph.add_vertex(fbp_graph.graph, id, new_label)
+    {:reply, new_vertex, fbp_graph}
   end
 
   @doc """
@@ -376,7 +420,7 @@ defmodule ElixirFBP.Graph do
         new_inports = Keyword.put(inports, port, initial_value)
         new_label = %{label | :inports => new_inports}
         :digraph.add_vertex(fbp_graph.graph, node_id, new_label)
-        nil
+        initial_value
     end
     {:reply, message, fbp_graph}
   end
@@ -435,6 +479,9 @@ defmodule ElixirFBP.Graph do
   end
   defp convert_to_type(:string, data) when is_bitstring(data) do
     data
+  end
+  defp convert_to_type(:string, data) do
+    inspect data
   end
   defp convert_to_type(:pid, data) when is_pid(data) do
     data

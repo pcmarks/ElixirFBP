@@ -83,14 +83,26 @@ defmodule FBPNetwork.FBPHandler do
       case command do
         "addnode" ->
           %{"id" => id, "component" => component, "metadata" => metadata,
-            "graph" => graph_id} = payload
+            "graph" => graph_id, "secret" => secret} = payload
           graph_reg_name = get_graph_registered_name(graph_id)
           Graph.add_node(graph_reg_name, id, component, metadata)
           {state, nil}
         "removenode" ->
-          %{"id" => id, "graph" => graph_id} = payload
+          %{"id" => id, "graph" => graph_id, "secret" => secret} = payload
           graph_reg_name = get_graph_registered_name(graph_id)
           Graph.remove_node(graph_reg_name, id)
+          {state, nil}
+        "renamenode" ->
+          %{"from" => from, "to" => to, "graph" => graph_id,
+              "secret" => secret} = payload
+          graph_reg_name = get_graph_registered_name(graph_id)
+          Graph.rename_node(graph_reg_name, from, to, secret)
+          {state, nil}
+        "changenode" ->
+          %{"id" => id, "metadata" => metadata, "graph" => graph_id,
+                "secret" => secret} = payload
+          graph_reg_name = get_graph_registered_name(graph_id)
+          Graph.change_node(graph_reg_name, id, metadata, secret)
           {state, nil}
         "addinitial" ->
           %{"src" => src, "tgt" => tgt, "graph" => graph_id} = payload

@@ -61,19 +61,19 @@ defmodule ElixirFBPGraphTest do
     assert Map.fetch!(label.metadata, :number_of_processes) == 1
   end
 
-  # test "Add a node with metadata" do
-  #   {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
-  #   node_id = Graph.add_node(fbp_graph_reg_name,
-  #                             @node_1,
-  #                             "Math.Add",
-  #                             %{number_of_processes: 4})
-  #   nodes = Graph.nodes(fbp_graph_reg_name)
-  #   assert node_id in nodes == true
-  #   fbp_graph = Graph.get(fbp_graph_reg_name)
-  #   {_node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
-  #   assert label.inports == [{:addend, nil}, {:augend, nil}]
-  #   assert Map.fetch!(label.metadata, :number_of_processes) == 4
-  # end
+  test "Add a node with metadata" do
+    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+    node_id = Graph.add_node(fbp_graph_reg_name,
+                              @node_1,
+                              "Math.Add",
+                              %{number_of_processes: 4})
+    nodes = Graph.nodes(fbp_graph_reg_name)
+    assert node_id in nodes == true
+    fbp_graph = Graph.get(fbp_graph_reg_name)
+    {_node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
+    assert label.inports == [{:addend, nil}, {:augend, nil}]
+    assert Map.fetch!(label.metadata, :number_of_processes) == 4
+  end
 
   test "Get the info associated with a node" do
     {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
@@ -89,6 +89,25 @@ defmodule ElixirFBPGraphTest do
     assert result == true
     nodes = Graph.nodes(fbp_graph_reg_name)
     assert @node_1 in nodes == false
+  end
+
+  test "Rename a node" do
+    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+    Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add")
+    result = Graph.rename_node(fbp_graph_reg_name, @node_1, "new_name", "secret")
+    fbp_graph = Graph.get(fbp_graph_reg_name)
+    {node_id, _label} = :digraph.vertex(fbp_graph.graph, "new_name")
+    assert node_id == "new_name"
+  end
+
+  test "Change the metadata in a node" do
+    {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
+    Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add", %{foobar: 33})
+    Graph.change_node(fbp_graph_reg_name, @node_1, %{foobar: 42}, "secret")
+    fbp_graph = Graph.get(fbp_graph_reg_name)
+    {_node_id, label} = :digraph.vertex(fbp_graph.graph, @node_1)
+    assert Map.has_key?(label.metadata, :foobar) == true
+    assert Map.get(label.metadata, :foobar) == 42
   end
 
   test "Add an edge between two nodes" do
