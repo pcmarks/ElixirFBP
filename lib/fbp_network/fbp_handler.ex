@@ -111,6 +111,13 @@ defmodule FBPNetwork.FBPHandler do
           graph_reg_name = get_graph_registered_name(graph_id)
           message = Graph.add_initial(graph_reg_name, data, node_id, String.to_atom(port))
           {state, message}
+        "removeinitial" ->
+          %{"tgt" => tgt, "graph" => graph_id, "secret" => secret} = payload
+          %{"node" => tgt_node, "port" => tgt_port} = tgt
+          graph_reg_name = get_graph_registered_name(graph_id)
+          message = Graph.remove_initial(graph_reg_name, tgt_node,
+                String.to_atom(tgt_port), secret)
+          {state, message}
         "addedge" ->
           %{"src" => src, "tgt" => tgt, "graph" => graph_id} = payload
           %{"node" => src_node, "port" => src_port} = src

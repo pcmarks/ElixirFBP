@@ -171,7 +171,7 @@ defmodule ElixirFBPGraphTest do
     {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
     Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add")
     Graph.add_initial(fbp_graph_reg_name, 27, @node_1, :addend)
-    result = Graph.remove_initial(fbp_graph_reg_name, @node_1, :addend)
+    result = Graph.remove_initial(fbp_graph_reg_name, @node_1, :addend, "none")
     assert result == nil
     # Double-check that the value is = nil
     fbp_graph = Graph.get(fbp_graph_reg_name)

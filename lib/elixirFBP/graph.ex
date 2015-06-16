@@ -179,7 +179,7 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Remove the edge between the two given node/ports in the FBP Graph
+  Remove the edge between the two given node/ports in an FBP Graph
   """
   def remove_edge(fbp_graph_reg_name,
                   src_node_id, src_port,
@@ -189,7 +189,19 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Place an initial value at the port of a node in the FBP Graph
+  Change an edge's metadata in an FBP Graph
+  """
+  def change_edge(fbp_graph_reg_name,
+                  src_node_id, src_port,
+                  tgt_node_id, tgt_port,
+                  metadata,
+                  secret) do
+    GenServer.call(fbp_graph_reg_name,
+        {:change_edge, src_node_id, src_port, tgt_node_id, tgt_port, metadata, secret})
+  end
+
+  @doc """
+  Place an initial value at the port of a node in and FBP Graph
   """
   def add_initial(fbp_graph_reg_name, data, node_id, port, metadata \\ %{}) do
     GenServer.call(fbp_graph_reg_name, {:add_initial, data, node_id, port, metadata})
@@ -199,8 +211,8 @@ defmodule ElixirFBP.Graph do
   Remove an initial value at the port of a node in the FBP Graph. It is set to
   the value nil.
   """
-  def remove_initial(fbp_graph_reg_name, node_id, port) do
-    GenServer.call(fbp_graph_reg_name, {:remove_initial, node_id, port})
+  def remove_initial(fbp_graph_reg_name, node_id, port, secret) do
+    GenServer.call(fbp_graph_reg_name, {:remove_initial, node_id, port, secret})
   end
 
   @doc """
@@ -394,7 +406,7 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Callback implementation for ElixirFBP.Graph.remove_edge(graph_reg_name)
+  Callback implementation for ElixirFBP.Graph.remove_edge()
   """
   def handle_call({:remove_edge,
                     src_node_id, src_port,
@@ -405,7 +417,18 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Callback implementation for ElixirFBP.Graph.add_initial(graph_reg_name)
+  Callback implementation for ElixirFBP.Graph.change_edge()
+  """
+  def handle_call({:change_edge,
+                    src_node_id, src_port,
+                    tgt_node_id, tgt_port,
+                    metadata, secret},
+                    _req, fbp_graph) do
+    # edge = :digraph.get_path
+  end
+
+  @doc """
+  Callback implementation for ElixirFBP.Graph.add_initial()
   """
   def handle_call({:add_initial, data, node_id, port, metadata}, _req, fbp_graph) do
     {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
@@ -426,9 +449,9 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Callback implementation for ElixirFBP.Graph.remove_initial(graph_reg_name)
+  Callback implementation for ElixirFBP.Graph.remove_initial()
   """
-  def handle_call({:remove_initial, node_id, port}, _req, fbp_graph) do
+  def handle_call({:remove_initial, node_id, port, secret}, _req, fbp_graph) do
     {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
     inports = label.inports
     new_inports = Keyword.put(inports, port, nil)
@@ -438,7 +461,7 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Callback implementation for ElixirFBP.Graph.stop(graph_name)
+  Callback implementation for ElixirFBP.Graph.stop()
   Stop the execution of a graph.
   Unregister and kill all of the node processes.
   """
