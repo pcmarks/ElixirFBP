@@ -79,28 +79,27 @@ defmodule FBPNetwork.FBPHandler do
   """
   def fbp_handle("graph", command, payload, req, state) do
     Logger.info("graph: #{command} / #{inspect payload}")
+    secret = Map.get(payload, "secret")
     {new_state, response} =
       case command do
         "addnode" ->
           %{"id" => id, "component" => component, "metadata" => metadata,
-            "graph" => graph_id, "secret" => secret} = payload
+            "graph" => graph_id} = payload
           graph_reg_name = get_graph_registered_name(graph_id)
           Graph.add_node(graph_reg_name, id, component, metadata)
           {state, nil}
         "removenode" ->
-          %{"id" => id, "graph" => graph_id, "secret" => secret} = payload
+          %{"id" => id, "graph" => graph_id} = payload
           graph_reg_name = get_graph_registered_name(graph_id)
           Graph.remove_node(graph_reg_name, id)
           {state, nil}
         "renamenode" ->
-          %{"from" => from, "to" => to, "graph" => graph_id,
-              "secret" => secret} = payload
+          %{"from" => from, "to" => to, "graph" => graph_id} = payload
           graph_reg_name = get_graph_registered_name(graph_id)
           Graph.rename_node(graph_reg_name, from, to, secret)
           {state, nil}
         "changenode" ->
-          %{"id" => id, "metadata" => metadata, "graph" => graph_id,
-                "secret" => secret} = payload
+          %{"id" => id, "metadata" => metadata, "graph" => graph_id} = payload
           graph_reg_name = get_graph_registered_name(graph_id)
           Graph.change_node(graph_reg_name, id, metadata, secret)
           {state, nil}
@@ -112,7 +111,7 @@ defmodule FBPNetwork.FBPHandler do
           message = Graph.add_initial(graph_reg_name, data, node_id, String.to_atom(port))
           {state, message}
         "removeinitial" ->
-          %{"tgt" => tgt, "graph" => graph_id, "secret" => secret} = payload
+          %{"tgt" => tgt, "graph" => graph_id} = payload
           %{"node" => tgt_node, "port" => tgt_port} = tgt
           graph_reg_name = get_graph_registered_name(graph_id)
           message = Graph.remove_initial(graph_reg_name, tgt_node,
@@ -207,10 +206,16 @@ defmodule FBPNetwork.FBPHandler do
           %{"graph" => graph, "running" => running, "started" => started}
         "start" ->
           start_time = :calendar.universal_time |> inspect
-          Network.start(graph)
-          payload = %{"graph" => graph, "time" => start_time, "running" => true,
-                      "started" => true}
-          %{"protocol" => "network", "command" => "started", "payload" => payload}
+          case Network.start(graph) do
+            :ok ->
+                command = "started"
+                payload = %{"graph" => graph, "time" => start_time,
+                      "running" => true, "started" => true}
+            error ->
+                command = "error"
+                payload = %{"message" => inspect error}
+          end
+          %{"protocol" => "network", "command" => command, "payload" => payload}
         "stop" ->
           stop_time = :calendar.universal_time |> inspect
           Network.stop(graph)
