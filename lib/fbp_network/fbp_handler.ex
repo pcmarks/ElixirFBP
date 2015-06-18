@@ -133,6 +133,16 @@ defmodule FBPNetwork.FBPHandler do
           Graph.remove_edge(graph_reg_name, src_node, String.to_atom(src_port),
                                           tgt_node, String.to_atom(tgt_port))
           {state, nil}
+        "changeedge" ->
+          %{"src" => src, "tgt" => tgt, "graph" => graph_id,
+            "metadata" => metadata} = payload
+          %{"node" => src_node, "port" => src_port} = src
+          %{"node" => tgt_node, "port" => tgt_port} = tgt
+          graph_reg_name = get_graph_registered_name(graph_id)
+          Graph.change_edge(graph_reg_name, src_node, String.to_atom(src_port),
+                                          tgt_node, String.to_atom(tgt_port),
+                                          metadata, secret)
+          {state, nil}
         _ ->
           Logger.warn("Graph command not handled: #{inspect command}")
           {state, nil}
@@ -165,8 +175,7 @@ defmodule FBPNetwork.FBPHandler do
           payload1 = %{"outPorts" => outPorts1, "inPorts" => inPorts1,
                         "name" => name1, "description" => description1}
           outPorts2 = []
-          inPorts2  = [%{"type" => "string", "id" => "in_port"},
-                       %{"type" => "pid", "id" => "out_pid"}]
+          inPorts2  = [%{"type" => "string", "id" => "in_port"}]
           name2 = "Core.Output"
           description2 = "Print the IP on the console."
           payload2 = %{"outPorts" => outPorts2, "inPorts" => inPorts2,
