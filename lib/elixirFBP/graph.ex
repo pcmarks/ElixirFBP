@@ -267,33 +267,40 @@ defmodule ElixirFBP.Graph do
   def handle_call(:start, _req, fbp_graph) do
     reg_name = fbp_graph.registered_name
     nodes = :digraph.vertices(fbp_graph.graph)
-    # For every component in the graph:
-    #   start the process - constructing outport process id's to send to
-    Enum.each(nodes, fn (node) ->
-      {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
-      ElixirFBP.Component.start(reg_name, node_id, label, fbp_graph.graph) end)
-    # For every component's inport, see if there is an initial value. If so,
-    # send this value to all of processes that have been spawned for this
-    # component. We do not use Component.send_ip for this type of message.
-    Enum.each(nodes, fn(node) ->
-      {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
-      inports = label.inports
-      for {port, value} <- inports do
-        if value != nil do
-          number_of_processes = label.metadata[:number_of_processes]
-          Enum.each(Range.new(1, number_of_processes), fn(process_no) ->
-            process_reg_name = String.to_atom(
-                                      Atom.to_string(reg_name)
-                                      <> "_"
-                                      <> node_id
-                                      <> "_#{process_no}")
-            send(process_reg_name, {port, value})
-          end)
+    # Verify that all out ports on all the nodes are connected to something
+    all_ok = verify_out_ports(fbp_graph.graph)
+    case all_ok do
+      [] ->
+      # For every component in the graph:
+      #   start the process - constructing outport process id's to send to
+      Enum.each(nodes, fn (node) ->
+        {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
+        ElixirFBP.Component.start(reg_name, node_id, label, fbp_graph.graph) end)
+      # For every component's inport, see if there is an initial value. If so,
+      # send this value to all of processes that have been spawned for this
+      # component. We do not use Component.send_ip for this type of message.
+      Enum.each(nodes, fn(node) ->
+        {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
+        inports = label.inports
+        for {port, value} <- inports do
+          if value != nil do
+            number_of_processes = label.metadata[:number_of_processes]
+            Enum.each(Range.new(1, number_of_processes), fn(process_no) ->
+              process_reg_name = String.to_atom(
+                                        Atom.to_string(reg_name)
+                                        <> "_"
+                                        <> node_id
+                                        <> "_#{process_no}")
+              send(process_reg_name, {port, value})
+            end)
+          end
         end
-      end
-    end)
-    new_fbp_graph = %ElixirFBP.Graph{fbp_graph | started: true, running: true}
-    {:reply, :ok, new_fbp_graph}
+      end)
+      new_fbp_graph = %ElixirFBP.Graph{fbp_graph | started: true, running: true}
+      {:reply, :ok, new_fbp_graph}
+    _ ->
+      {:reply, all_ok, fbp_graph}
+    end
   end
 
   @doc """
@@ -488,6 +495,35 @@ defmodule ElixirFBP.Graph do
   """
   def terminate(reason, fbp_graph) do
     :ok
+  end
+
+  def verify_out_ports(graph) do
+    nodes = :digraph.vertices(graph)
+    Enum.reduce(nodes, [], fn(node, node_results) ->
+      {_,%{outports: outports} = label} = :digraph.vertex(graph, node)
+      if length(outports) > 0 do
+        out_ports = :digraph.out_edges(graph, node)
+        case out_ports do
+          [] ->
+            [{:error, "no outports are connected"} | node_results]
+          _ ->
+            o_p_results = Enum.reduce(out_ports, [], fn(out_port, out_port_results) ->
+              case :digraph.edge(graph, out_port) do
+                {_, _, nil, %{src_port: src_port} = label} ->
+                  [{:error, src_port} | out_port_results]
+                _ ->
+                  out_port_results
+              end
+            end)
+            case o_p_results do
+              [] -> node_results
+              _  -> [o_p_results | node_results]
+            end
+        end
+      else
+        node_results
+      end
+    end)
   end
 
   defp convert_to_type(:integer, data) when is_bitstring(data) do

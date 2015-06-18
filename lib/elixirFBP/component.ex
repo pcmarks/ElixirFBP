@@ -6,31 +6,36 @@ defmodule ElixirFBP.Component do
   spawned.
 
   Component is also used to send data to a specific port on a specific node. The
-  node has already been spawned and is identified my the atom representation of
+  node has already been spawned and is identified by the atom representation of
   its node name.
 
   """
   @doc """
-  This function can figure out a node's inports and outports by accessing the respective
-  function in the component module definition, e.g. Math.Add.inports. The argument label
-  refers to the label value associated with the Erlang :digraph vertex.
+  Start the execution of a component in its own process(es).
+  This function can figure out a component's inports and outports by accessing
+  the respective function in the component module definition, e.g.
+  Math.Add.inports. The argument label refers to the label value associated with
+  the Erlang :digraph vertex.
   Spawn as many process as are specified in the metadata :number_of_processes value (the
-  default value is one), each identified with a process
-  name of the atom value of graph_id <> "_" <> node_id <> process_number, where process_number
+  default value is one), each identified with a process name of the atom value
+  of graph_id <> "_" <> node_id <> process_number, where process_number
   goes from 1 to number_of_processes.
-  Return the process name (string) for the spawned process root name and the number of processes
-  started
+  Return {:ok, process name, number} or {:error, reason} where process name
+  (string) is the spawned process root name and number is the number of processes
+  started.
   """
   def start(graph_reg_name, node_id, label, fbp_graph) do
     # IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
-    # Retrieve the list of inports and outports for this type of component
+    # Retrieve the list of inports and outports for this component
     {inports, _} = Code.eval_string(label.component <> ".inports")
     {_outports, _} = Code.eval_string(label.component <> ".outports")
-    # There should be as many nil inport values as different inports
+
+    # Spawning a process requires a module name - Note that we have to prepend
+    # the component name with "Elxir" and a list of argument values - to the loop
+    # function for a component. The in port arguments are nil but the out port
+    # arguments need to be set up with the name of the component process that
+    # it is connected to.
     inport_args = List.duplicate(nil, length(inports))
-    # The outport values consists of the Elixir process name of the node it is
-    # connected to along with its port name. Note that we have to prepend
-    # the component name with the string "Elixir."
     outport_args = prepare_outport_args(graph_reg_name, node_id, fbp_graph)
     process_reg_name = Atom.to_string(graph_reg_name) <> "_" <> node_id
     module = Module.concat("Elixir", label.component)
@@ -86,7 +91,8 @@ defmodule ElixirFBP.Component do
 
   @doc """
   A private function that can assemble the process id and port name that a
-  component is connected to. The connection is between an outport and an inport.
+  component is connected to. The connection is between an out port and an in port.
+  If there is no connection (no edges) on this out port an error is returned.
   """
   defp prepare_outport_args(graph_reg_name, node_id, graph) do
     # fbp_graph = ElixirFBP.Graph.get(graph_reg_name)

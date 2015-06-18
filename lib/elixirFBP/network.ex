@@ -161,8 +161,12 @@ defmodule ElixirFBP.Network do
   """
   def handle_call({:start, graph_id}, _req, network) do
     reg_name = HashDict.get(network.graph_reg_names, graph_id)
-    Graph.start(reg_name)
-    {:reply, :ok, network}
+    case Graph.start(reg_name) do
+      {:ok} ->
+        {:reply, :ok, network}
+      error ->
+        {:reply, error, network}
+    end
   end
 
   @doc """
