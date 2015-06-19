@@ -1,0 +1,65 @@
+{
+    "properties": {
+        "name": "main",
+        "id": "first/main",
+        "project": "first",
+        "environment": {
+            "type": "elixir-fbp"
+        },
+        "changed": true,
+        "description": "This is a test",
+        "icon": ""
+    },
+    "inports": {},
+    "outports": {},
+    "groups": [],
+    "processes": {
+        "Math.Add_pcdry": {
+            "component": "Math.Add",
+            "metadata": {
+                "label": "Math.Add",
+                "x": 360,
+                "y": 360,
+                "width": 72,
+                "height": 72
+            }
+        },
+        "Core.Output_8xxcr": {
+            "component": "Core.Output",
+            "metadata": {
+                "label": "Core.Output",
+                "x": 576,
+                "y": 360,
+                "width": 72,
+                "height": 72
+            }
+        }
+    },
+    "connections": [
+        {
+            "src": {
+                "process": "Math.Add_pcdry",
+                "port": "sum"
+            },
+            "tgt": {
+                "process": "Core.Output_8xxcr",
+                "port": "in_port"
+            },
+            "metadata": {}
+        },
+        {
+            "data": "33",
+            "tgt": {
+                "process": "Math.Add_pcdry",
+                "port": "addend"
+            }
+        },
+        {
+            "data": "44",
+            "tgt": {
+                "process": "Math.Add_pcdry",
+                "port": "augend"
+            }
+        }
+    ]
+}
