@@ -38,11 +38,10 @@ Packets (IIP’s) can also be specified.</p>
 <p>Graphs are implemented using Erlang’s digraph library.</p>
 <p>The digraph Label associated with a node (digraph vertex) is
 [component, inports, inport_types, outports, outport_types, metadata] where
-component is the string name
-of a component e.g., “Math.Add”. inports
+component is the string name of a component e.g., “Math.Add”. inports
 and outports are lists of atomic name, initial value pairs, e.g., {:augend, 2} and
 inport_types and outport_types are lists of atomic name, type, e.g., {:augend, :integer}.</p>
-<p>Initial values can be set using the graph add_initial command.</p>
+<p>Initial values can be set using the add_initial graph command.</p>
 <p>The digraph Label associated with an edge is [src.port,, tgt.port, metadata] where src.port
 and tgt.port are atom values for the component’s ports.</p>
 <p>Functions supported by this module are based on NoFlo’s FBP Network Protocol,
@@ -73,14 +72,28 @@ TODO: Metadata needs to be stored somewhere in add_initial()</p>
 <tr>
   <td class="summary_signature"><a href="#add_initial/5">add_initial(fbp_graph_reg_name, data, node_id, port, metadata \\ %{})</a></td>
   
-    <td class="summary_synopsis"><p>Place an initial value at the port of a node in the FBP Graph</p>
+    <td class="summary_synopsis"><p>Place an initial value at the port of a node in and FBP Graph</p>
 </td>
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#add_node/4">add_node(fbp_graph_reg_name, node_id, component, metadata \\ %{number_of_processes: 1})</a></td>
+  <td class="summary_signature"><a href="#add_node/4">add_node(fbp_graph_reg_name, node_id, component, metadata \\ %{})</a></td>
   
     <td class="summary_synopsis"><p>Add a node to the FBP Graph. Note the number of default processes is 1</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#change_edge/7">change_edge(fbp_graph_reg_name, src_node_id, src_port, tgt_node_id, tgt_port, metadata, secret)</a></td>
+  
+    <td class="summary_synopsis"><p>Change an edge’s metadata in an FBP Graph</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#change_node/4">change_node(fbp_graph_reg_name, node_id, metadata, secret)</a></td>
+  
+    <td class="summary_synopsis"><p>Change the metadata associated with a node in a graph</p>
 </td>
   
 </tr>
@@ -137,12 +150,12 @@ Create and initialize the FBP Graph Structure which becomes the State</p>
 <tr>
   <td class="summary_signature"><a href="#remove_edge/5">remove_edge(fbp_graph_reg_name, src_node_id, src_port, tgt_node_id, tgt_port)</a></td>
   
-    <td class="summary_synopsis"><p>Remove the edge between the two given node/ports in the FBP Graph</p>
+    <td class="summary_synopsis"><p>Remove the edge between the two given node/ports in an FBP Graph</p>
 </td>
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#remove_initial/3">remove_initial(fbp_graph_reg_name, node_id, port)</a></td>
+  <td class="summary_signature"><a href="#remove_initial/4">remove_initial(fbp_graph_reg_name, node_id, port, secret)</a></td>
   
     <td class="summary_synopsis"><p>Remove an initial value at the port of a node in the FBP Graph. It is set to
 the value nil</p>
@@ -152,7 +165,14 @@ the value nil</p>
 <tr>
   <td class="summary_signature"><a href="#remove_node/2">remove_node(fbp_graph_reg_name, node_id)</a></td>
   
-    <td class="summary_synopsis"><p>Remove a node from the FBP Graph</p>
+    <td class="summary_synopsis"><p>Remove a node from an FBP Graph</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#rename_node/4">rename_node(fbp_graph_reg_name, from, to, secret)</a></td>
+  
+    <td class="summary_synopsis"><p>Rename a node in an FBP Graph</p>
 </td>
   
 </tr>
@@ -200,6 +220,10 @@ This should normally be called via the Network.stop(graph_id) function</p>
 </td>
   
 </tr>
+<tr>
+  <td class="summary_signature"><a href="#verify_out_ports/1">verify_out_ports(graph)</a></td>
+  
+</tr>
 
         </table>
       
@@ -235,7 +259,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L150" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L172" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -249,16 +273,16 @@ This should normally be called via the Network.stop(graph_id) function</p>
   </div>
   
   <section class="docstring">
-    <p>Place an initial value at the port of a node in the FBP Graph</p>
+    <p>Place an initial value at the port of a node in and FBP Graph</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L171" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L205" class="view_source">Source</a>
   
 </section>
 <section class="detail">
   <div class="detail_header" id="add_node/4">
-    <span class="signature"><strong>add_node(fbp_graph_reg_name, node_id, component, metadata \\ %{number_of_processes: 1})</strong></span>
+    <span class="signature"><strong>add_node(fbp_graph_reg_name, node_id, component, metadata \\ %{})</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
       <a href="#add_node/4" class="detail_link" title="Link to this function">#</a>
@@ -271,7 +295,43 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L135" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L134" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="change_edge/7">
+    <span class="signature"><strong>change_edge(fbp_graph_reg_name, src_node_id, src_port, tgt_node_id, tgt_port, metadata, secret)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#change_edge/7" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Change an edge’s metadata in an FBP Graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L193" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="change_node/4">
+    <span class="signature"><strong>change_node(fbp_graph_reg_name, node_id, metadata, secret)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#change_node/4" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Change the metadata associated with a node in a graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L162" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -289,7 +349,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L128" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L127" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -307,7 +367,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L100" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L99" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -325,7 +385,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L121" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L120" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -343,7 +403,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L107" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L106" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -361,7 +421,7 @@ This should normally be called via the Network.stop(graph_id) function</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L58" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L57" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -380,7 +440,7 @@ Create and initialize the FBP Graph Structure which becomes the State</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L58" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L57" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -398,7 +458,7 @@ Create and initialize the FBP Graph Structure which becomes the State</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L114" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L113" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -412,19 +472,19 @@ Create and initialize the FBP Graph Structure which becomes the State</p>
   </div>
   
   <section class="docstring">
-    <p>Remove the edge between the two given node/ports in the FBP Graph</p>
+    <p>Remove the edge between the two given node/ports in an FBP Graph</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L161" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L183" class="view_source">Source</a>
   
 </section>
 <section class="detail">
-  <div class="detail_header" id="remove_initial/3">
-    <span class="signature"><strong>remove_initial(fbp_graph_reg_name, node_id, port)</strong></span>
+  <div class="detail_header" id="remove_initial/4">
+    <span class="signature"><strong>remove_initial(fbp_graph_reg_name, node_id, port, secret)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
-      <a href="#remove_initial/3" class="detail_link" title="Link to this function">#</a>
+      <a href="#remove_initial/4" class="detail_link" title="Link to this function">#</a>
       <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
     </div>
   </div>
@@ -435,7 +495,7 @@ the value nil.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L179" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L213" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -449,11 +509,29 @@ the value nil.</p>
   </div>
   
   <section class="docstring">
-    <p>Remove a node from the FBP Graph</p>
+    <p>Remove a node from an FBP Graph</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L143" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L144" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="rename_node/4">
+    <span class="signature"><strong>rename_node(fbp_graph_reg_name, from, to, secret)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#rename_node/4" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Rename a node in an FBP Graph</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L151" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -471,7 +549,7 @@ the value nil.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L78" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L77" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -489,7 +567,7 @@ the value nil.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L85" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L84" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -508,7 +586,7 @@ graph_id - converted to an atom.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L67" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L66" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -526,7 +604,7 @@ graph_id - converted to an atom.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L186" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L220" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -545,7 +623,7 @@ This should normally be called via the Network.stop(graph_id) function.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L93" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L92" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -563,7 +641,24 @@ This should normally be called via the Network.stop(graph_id) function.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L58" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L57" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="verify_out_ports/1">
+    <span class="signature"><strong>verify_out_ports(graph)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#verify_out_ports/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/graph.ex#L513" class="view_source">Source</a>
   
 </section>
 

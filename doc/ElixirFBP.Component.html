@@ -33,7 +33,7 @@ an Elixir module name - and spawns a process. It is assumed that the component
 module supports a loop function which will be called when the component is
 spawned.</p>
 <p>Component is also used to send data to a specific port on a specific node. The
-node has already been spawned and is identified my the atom representation of
+node has already been spawned and is identified by the atom representation of
 its node name.</p>
 
         </section>
@@ -51,21 +51,24 @@ its node name.</p>
   
     <td class="summary_synopsis"><p>Assemble and send an IP to an in port of a running process. If there are
 multiple processes for this component, send it to the “next” process.
-Return an updated target with the new next process number</p>
+Return an updated target with a new next process number</p>
 </td>
   
 </tr>
 <tr>
   <td class="summary_signature"><a href="#start/4">start(graph_reg_name, node_id, label, fbp_graph)</a></td>
   
-    <td class="summary_synopsis"><p>This function can figure out a node’s inports and outports by accessing the respective
-function in the component module definition, e.g. Math.Add.inports. The argument label
-refers to the label value associated with the Erlang :digraph vertex.
+    <td class="summary_synopsis"><p>Start the execution of a component in its own process(es).
+This function can figure out a component’s inports and outports by accessing
+the respective function in the component module definition, e.g.
+Math.Add.inports. The argument label refers to the label value associated with
+the Erlang :digraph vertex.
 Spawn as many process as are specified in the metadata :number<em>of_processes value (the
-default value is one), each identified with a process
-name of the atom value of graph_id &lt;&gt; “</em>“ &lt;&gt; node_id &lt;&gt; process_number, where process_number
+default value is one), each identified with a process name of the atom value
+of graph_id &lt;&gt; “</em>“ &lt;&gt; node_id &lt;&gt; process_number, where process_number
 goes from 1 to number_of_processes.
-Return the process name (string) for the spawned process root name and the number of processes
+Return {:ok, process name, number} or {:error, reason} where process name
+(string) is the spawned process root name and number is the number of processes
 started</p>
 </td>
   
@@ -100,11 +103,11 @@ unregister it and force an exit</p>
   <section class="docstring">
     <p>Assemble and send an IP to an in port of a running process. If there are
 multiple processes for this component, send it to the “next” process.
-Return an updated target with the new next process number.</p>
+Return an updated target with a new next process number.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L70" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L75" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -118,19 +121,22 @@ Return an updated target with the new next process number.</p>
   </div>
   
   <section class="docstring">
-    <p>This function can figure out a node’s inports and outports by accessing the respective
-function in the component module definition, e.g. Math.Add.inports. The argument label
-refers to the label value associated with the Erlang :digraph vertex.
+    <p>Start the execution of a component in its own process(es).
+This function can figure out a component’s inports and outports by accessing
+the respective function in the component module definition, e.g.
+Math.Add.inports. The argument label refers to the label value associated with
+the Erlang :digraph vertex.
 Spawn as many process as are specified in the metadata :number<em>of_processes value (the
-default value is one), each identified with a process
-name of the atom value of graph_id &lt;&gt; “</em>“ &lt;&gt; node_id &lt;&gt; process_number, where process_number
+default value is one), each identified with a process name of the atom value
+of graph_id &lt;&gt; “</em>“ &lt;&gt; node_id &lt;&gt; process_number, where process_number
 goes from 1 to number_of_processes.
-Return the process name (string) for the spawned process root name and the number of processes
-started</p>
+Return {:ok, process name, number} or {:error, reason} where process name
+(string) is the spawned process root name and number is the number of processes
+started.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L24" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L27" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -149,7 +155,7 @@ unregister it and force an exit.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L52" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L57" class="view_source">Source</a>
   
 </section>
 

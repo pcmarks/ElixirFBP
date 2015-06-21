@@ -38,7 +38,7 @@
           <tr>
   <td class="summary_signature"><a href="#init/3">init(arg1, req, opts)</a></td>
   
-    <td class="summary_synopsis"><p>By returning :upgrade we cause Cowboy to switch to web socket mode</p>
+    <td class="summary_synopsis"><p>By returning :upgrade Cowboy will switch to web socket mode</p>
 </td>
   
 </tr>
@@ -50,17 +50,18 @@
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#websocket_info/3">websocket_info(info, req, state)</a></td>
+  <td class="summary_signature"><a href="#websocket_info/3">websocket_info(arg1, req, state)</a></td>
   
-    <td class="summary_synopsis"><p>Callback implementation for <code class="inline">c::cowboy_websocket_handler.websocket_info/3</code></p>
+    <td class="summary_synopsis"><p>Somebody in the FBP Network has sent us an error. Pass it on, correctly
+formatted</p>
 </td>
   
 </tr>
 <tr>
   <td class="summary_signature"><a href="#websocket_init/3">websocket_init(transport_name, req, opts)</a></td>
   
-    <td class="summary_synopsis"><p>Called just before switching to websocket mode. Here we have a chance
-to create state</p>
+    <td class="summary_synopsis"><p>Called just before switching to websocket mode. Register this process as a
+client with the ElixirFBP Runtime server process</p>
 </td>
   
 </tr>
@@ -91,7 +92,7 @@ to create state</p>
   </div>
   
   <section class="docstring">
-    <p>By returning :upgrade we cause Cowboy to switch to web socket mode</p>
+    <p>By returning :upgrade Cowboy will switch to web socket mode</p>
 
   </section>
   
@@ -113,12 +114,12 @@ to create state</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L23" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L24" class="view_source">Source</a>
   
 </section>
 <section class="detail">
   <div class="detail_header" id="websocket_info/3">
-    <span class="signature"><strong>websocket_info(info, req, state)</strong></span>
+    <span class="signature"><strong>websocket_info(arg1, req, state)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
       <a href="#websocket_info/3" class="detail_link" title="Link to this function">#</a>
@@ -127,11 +128,12 @@ to create state</p>
   </div>
   
   <section class="docstring">
-    <p>Callback implementation for <code class="inline">c::cowboy_websocket_handler.websocket_info/3</code>.</p>
+    <p>Somebody in the FBP Network has sent us an error. Pass it on, correctly
+formatted.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L37" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L42" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -145,8 +147,8 @@ to create state</p>
   </div>
   
   <section class="docstring">
-    <p>Called just before switching to websocket mode. Here we have a chance
-to create state</p>
+    <p>Called just before switching to websocket mode. Register this process as a
+client with the ElixirFBP Runtime server process</p>
 
   </section>
   
@@ -168,7 +170,7 @@ to create state</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L41" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/fbp_network/ws_handler.ex#L64" class="view_source">Source</a>
   
 </section>
 

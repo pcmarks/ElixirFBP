@@ -32,6 +32,10 @@
 runtime capabilites of a particular instance of ElixirFBP. In its structure,
 it stores descriptive data, a list of capabilities and a list of components
 that may be used to construct FBP programs.</p>
+<p>The client that is currently connected to this runtime is stored in the state.
+It is expected that this is a pid to which messages can be sent and that are
+understood by that particular client. For example, if the client-runtime
+connection is via Websockets then this pid is a Websocket handler.</p>
 <p>Most data is loaded dynamically at GenServer start time but can be
 updated after initialization.</p>
 <p>The GenServer is registered with the name of this module.</p>
@@ -65,6 +69,30 @@ updated after initialization.</p>
   
     <td class="summary_synopsis"><p>Callback implementation for ElixirFBP.Runtime.start_link
 Start up a Network and initialize the Runtime state</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#register_client/1">register_client(client)</a></td>
+  
+    <td class="summary_synopsis"><p>Register the process that represents the client that this runtime will
+communicate with</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#send_client_error/1">send_client_error(message)</a></td>
+  
+    <td class="summary_synopsis"><p>Send the currently connected client an error message. The process representing the
+client should know how to parse this message</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#send_client_message/1">send_client_message(message)</a></td>
+  
+    <td class="summary_synopsis"><p>Send the currently connected client a message. The process representing the
+client should know how to parse this message</p>
 </td>
   
 </tr>
@@ -120,7 +148,7 @@ Start up a Network and initialize the Runtime state</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L40" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L46" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -138,7 +166,7 @@ Start up a Network and initialize the Runtime state</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L25" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L31" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -157,7 +185,64 @@ Start up a Network and initialize the Runtime state.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L25" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L31" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="register_client/1">
+    <span class="signature"><strong>register_client(client)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#register_client/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Register the process that represents the client that this runtime will
+communicate with.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L61" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="send_client_error/1">
+    <span class="signature"><strong>send_client_error(message)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#send_client_error/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Send the currently connected client an error message. The process representing the
+client should know how to parse this message.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L77" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="send_client_message/1">
+    <span class="signature"><strong>send_client_message(message)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#send_client_message/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Send the currently connected client a message. The process representing the
+client should know how to parse this message.</p>
+
+  </section>
+  
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L69" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -175,7 +260,7 @@ Start up a Network and initialize the Runtime state.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L47" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L53" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -193,7 +278,7 @@ Start up a Network and initialize the Runtime state.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L33" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L39" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -211,7 +296,7 @@ Start up a Network and initialize the Runtime state.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L54" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L84" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -229,7 +314,7 @@ Start up a Network and initialize the Runtime state.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L25" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L31" class="view_source">Source</a>
   
 </section>
 
