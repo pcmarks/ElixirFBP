@@ -11,12 +11,11 @@ defmodule ElixirFBP.Graph do
 
   The digraph Label associated with a node (digraph vertex) is
   [component, inports, inport_types, outports, outport_types, metadata] where
-  component is the string name
-  of a component e.g., "Math.Add". inports
+  component is the string name of a component e.g., "Math.Add". inports
   and outports are lists of atomic name, initial value pairs, e.g., {:augend, 2} and
   inport_types and outport_types are lists of atomic name, type, e.g., {:augend, :integer}.
 
-  Initial values can be set using the graph add_initial command.
+  Initial values can be set using the add_initial graph command.
 
   The digraph Label associated with an edge is [src.port,, tgt.port, metadata] where src.port
   and tgt.port are atom values for the component's ports.
@@ -431,7 +430,21 @@ defmodule ElixirFBP.Graph do
                     tgt_node_id, tgt_port,
                     metadata, secret},
                     _req, fbp_graph) do
-    # edge = :digraph.get_path
+    edges = :digraph.out_edges(fbp_graph.graph, src_node_id)
+    Enum.each(edges, fn(edge) ->
+      {_, _, node, label} = :digraph.edge(fbp_graph.graph, edge)
+      if node == tgt_node_id do
+        current_metadata = label.metadata
+        new_metadata = Map.merge(current_metadata, metadata)
+        new_label = %{label | :metadata => new_metadata}
+        new_edge = :digraph.add_edge(
+                        fbp_graph.graph,
+                        src_node_id,
+                        tgt_node_id,
+                        label)
+      end
+    end)
+    {:reply, nil, fbp_graph}
   end
 
   @doc """

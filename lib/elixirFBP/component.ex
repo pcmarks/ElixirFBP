@@ -70,7 +70,7 @@ defmodule ElixirFBP.Component do
   @doc """
   Assemble and send an IP to an in port of a running process. If there are
   multiple processes for this component, send it to the "next" process.
-  Return an updated target with the new next process number.
+  Return an updated target with a new next process number.
   """
   def send_ip(target, value) do
     # IO.puts("\nComponent.send_ip(#{inspect target}, #{inspect value})")
