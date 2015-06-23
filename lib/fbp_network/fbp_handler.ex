@@ -163,26 +163,15 @@ defmodule FBPNetwork.FBPHandler do
     responses =
       case command do
         "list" ->
-          #################
-          # The following components are hardwired.
-          # ToDo: Subsequent releases will locate all components
-          #################
-          outPorts1 = [%{"type" => "integer", "id" => "sum"}]
-          inPorts1  = [%{"type" => "integer", "id" => "addend"},
-                      %{"type" => "integer", "id" => "augend"}]
-          name1 = "Math.Add"
-          description1 = "Add two integers in Elixir."
-          payload1 = %{"outPorts" => outPorts1, "inPorts" => inPorts1,
-                        "name" => name1, "description" => description1}
-          outPorts2 = []
-          inPorts2  = [%{"type" => "string", "id" => "in_port"}]
-          name2 = "Core.Output"
-          description2 = "Print the IP on the console."
-          payload2 = %{"outPorts" => outPorts2, "inPorts" => inPorts2,
-                        "name" => name2, "description" => description2}
-          [%{"protocol" => "component", "command" => "component", "payload" => payload1},
-           %{"protocol" => "component", "command" => "component", "payload" => payload2},
-           %{"protocol" => "component", "command" => "componentsready", "payload" => "2"}]
+          # Ask the Runtime for a list of the components that it knows about
+          components = ElixirFBP.Runtime.get_parameter(:components)
+          # Format the web socket response
+          response = Enum.map(components, fn(component) ->
+            %{"protocol" => "component", "command" => "component", "payload" => component}
+          end)
+          response ++
+           [%{"protocol" => "component", "command" => "componentsready",
+           "payload" => to_string(length(response))}]
         _ ->
           Logger.warn("Component command not handled: #{inspect command}")
           nil

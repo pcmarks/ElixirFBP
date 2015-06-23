@@ -10,7 +10,11 @@ defmodule ElixirFBP.Runtime do
   understood by that particular client. For example, if the client-runtime
   connection is via Websockets then this pid is a Websocket handler.
 
-  Most data is loaded dynamically at GenServer start time but can be
+  The list of components that are available to users of this runtime are stored
+  in the state. This list will be used as a response to a client request for a
+  list of components.
+
+  Most data are loaded dynamically at GenServer start time but can be
   updated after initialization.
 
   The GenServer is registered with the name of this module.
@@ -93,7 +97,15 @@ defmodule ElixirFBP.Runtime do
   """
   def init(parameters) do
     network = ElixirFBP.Network.start_link
-    runtime = %ElixirFBP.Runtime{}
+    #################
+    # The following components are hardwired.
+    # ToDo: Subsequent releases will locate all components
+    #################
+    # modules = [Math.Add, Core.Output]
+    modules = [Streamtools.Filter, Streamtools.GetHTTPJSON,
+      Streamtools.Map, Streamtools.Ticker, Streamtools.Unpack]
+    components = ElixirFBP.ComponentLoader.get_components(modules)
+    runtime = %ElixirFBP.Runtime{:components => components}
     {:ok, runtime}
   end
 

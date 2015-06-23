@@ -4,6 +4,7 @@ defmodule Streamtools.GetHTTPJSON do
   """
   alias ElixirFBP.Component
 
+  def description, do: "Get the JSON encoding from this url"
   def inports, do: [path: :string]
   def outports, do: [out: :string]
 

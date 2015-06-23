@@ -4,6 +4,7 @@ defmodule Streamtools.Map do
   """
   alias ElixirFBP.Component
 
+  def description, do: "Map inbound data onto outbound data"
   def inports, do: [in_port: :string, map: :string]
   def outports, do: [out: :string]
 

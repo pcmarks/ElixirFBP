@@ -6,6 +6,7 @@ defmodule Streamtools.Ticker do
   use Timex
   alias ElixirFBP.Component
 
+  def description, do: "Emit a time stamp periodically."
   def inports, do: [interval: :integer]
   def outports, do: [out: :string]
 

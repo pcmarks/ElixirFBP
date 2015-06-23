@@ -4,6 +4,7 @@ defmodule Streamtools.Unpack do
   """
   alias ElixirFBP.Component
 
+  def description, do: "Take an array of objects and emit each object separately."
   def inports, do: [part: :string, in_port: :string]
   def outports, do: [out: :string]
 

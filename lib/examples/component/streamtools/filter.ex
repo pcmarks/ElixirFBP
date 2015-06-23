@@ -4,6 +4,7 @@ defmodule Streamtools.Filter do
   """
   alias ElixirFBP.Component
 
+  def description, do: "Filter according to a value."
   def inports, do: [filter: :string, filter_value: :string, in_port: :string]
   def outports, do: [out: :string]
 
