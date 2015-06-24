@@ -42,4 +42,13 @@ defmodule ElixirFBPRuntimeTest do
     assert Runtime.get_parameter(:version) == "0.0.2"
     Runtime.stop
   end
+
+  test "retrieving Runtime Components" do
+    pid = Process.whereis(:ElixirFBP.Runtime)
+    if ! pid do
+      {:ok, pid} = Runtime.start_link
+    end
+    components = Runtime.get_parameter(:components)
+    assert components != nil
+  end
 end
