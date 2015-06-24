@@ -28,22 +28,24 @@ defmodule ElixirFBP.Component do
     # IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
     # Retrieve the list of inports and outports for this component
     {inports, _} = Code.eval_string(label.component <> ".inports")
-    {_outports, _} = Code.eval_string(label.component <> ".outports")
+    {outports, _} = Code.eval_string(label.component <> ".outports")
 
     # Spawning a process requires a module name - Note that we have to prepend
     # the component name with "Elxir" and a list of argument values - to the loop
     # function for a component. The in port arguments are nil but the out port
     # arguments need to be set up with the name of the component process that
     # it is connected to.
-    inport_args = List.duplicate(nil, length(inports))
-    outport_args = prepare_outport_args(graph_reg_name, node_id, fbp_graph)
+    #inport_args = List.duplicate(nil, length(inports))
+    inport_args = inports |> Enum.map(fn({k, _v}) -> {k, nil} end) |> Enum.into(%{})
+    outport_args = prepare_outport_args(graph_reg_name, node_id, fbp_graph) |>
+                    Enum.into(%{})
     process_reg_name = Atom.to_string(graph_reg_name) <> "_" <> node_id
     module = Module.concat("Elixir", label.component)
     number_of_processes = label.metadata[:number_of_processes]
     # We can spawn all of the component processes now,
     # asking each component process to execute its loop function.
     Enum.each(Range.new(1, number_of_processes), fn(process_no) ->
-      process_pid = spawn(module, :loop, inport_args ++ outport_args)
+      process_pid = spawn(module, :loop, [inport_args, outport_args])
       process_reg_name_atom = String.to_atom("#{process_reg_name}_#{process_no}")
       Process.register(process_pid, process_reg_name_atom)
     end)
@@ -106,10 +108,10 @@ defmodule ElixirFBP.Component do
           String.to_atom(
               Atom.to_string(graph_reg_name) <> "_" <> tgt_node <> "_#{i}")
         end)
-      %{process_reg_names: List.to_tuple(process_reg_names),
+      {edge_label.src_port, %{process_reg_names: List.to_tuple(process_reg_names),
         number_of_processes: number_of_processes,
         next_process: 0,
-        inport: edge_label.tgt_port}
+        inport: edge_label.tgt_port}}
     end)
   end
 

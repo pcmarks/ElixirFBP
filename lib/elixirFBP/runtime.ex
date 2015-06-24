@@ -101,9 +101,9 @@ defmodule ElixirFBP.Runtime do
     # The following components are hardwired.
     # ToDo: Subsequent releases will locate all components
     #################
-    # modules = [Math.Add, Core.Output]
-    modules = [Streamtools.Filter, Streamtools.GetHTTPJSON,
-      Streamtools.Map, Streamtools.Ticker, Streamtools.Unpack]
+    modules = [Math.Add, Core.Output]
+    # modules = [Streamtools.Filter, Streamtools.GetHTTPJSON,
+    #   Streamtools.Map, Streamtools.Ticker, Streamtools.Unpack]
     components = ElixirFBP.ComponentLoader.get_components(modules)
     runtime = %ElixirFBP.Runtime{:components => components}
     {:ok, runtime}

@@ -6,23 +6,26 @@ defmodule Math.Add do
   def inports, do: [addend: :integer, augend: :integer]
   def outports, do: [sum: :integer]
 
-  def loop(augend, addend, sum) do
-    # IO.puts("Math.Add.loop(#{inspect augend},#{inspect addend}, #{inspect sum})")
+  def loop(inports, outports) do
+    %{:augend => augend, :addend => addend} = inports
+    %{:sum => sum} = outports
     receive do
-      {:augend, value} when addend != nil ->
-        # IO.puts("Math.Add: {:augend, #{value}}")
+      {:augend, value} when not is_nil(addend) ->
         sum = ElixirFBP.Component.send_ip(sum, addend + value)
-        loop(nil, nil, sum)
+        outports = %{outports | :sum => sum}
+        inports = %{inports | :augend => nil, :addend => nil}
+        loop(inports, outports)
       {:augend, value} ->
-        # IO.puts("Math.Add: {:augend, #{value}}")
-        loop(value, addend, sum)
-      {:addend, value} when augend != nil ->
-        # IO.puts("Math.Add: {:addend, #{value}}, augend: #{augend}")
+        inports = %{inports | :augend => value}
+        loop(inports, outports)
+      {:addend, value} when not is_nil(augend) ->
         sum = ElixirFBP.Component.send_ip(sum, value + augend)
-        loop(nil, nil, sum)
+        outports = %{outports | :sum => sum}
+        inports = %{inports | :augend => nil, :addend => nil}
+        loop(inports, outports)
       {:addend, value} ->
-        # IO.puts("Math.Add: {:addend, #{value}}")
-        loop(augend, value, sum)
+        inports = %{inports | :addend => value}
+        loop(inports, outports)
     end
   end
 end
