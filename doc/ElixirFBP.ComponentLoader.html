@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Math.Add</title>
+    <title>ElixirFBP.ComponentLoader</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/elixir.css">
   </head>
   <body>
     <section id="content">
-      <div class="breadcrumbs">ElixirFBP v0.0.1 &rarr; <a href="overview.html">Overview</a> &rarr; Math &rarr; <a href="Math.Add.html">Add</a></div>
+      <div class="breadcrumbs">ElixirFBP v0.0.1 &rarr; <a href="overview.html">Overview</a> &rarr; <a href="ElixirFBP.html">ElixirFBP</a> &rarr; <a href="ElixirFBP.ComponentLoader.html">ComponentLoader</a></div>
       <h1>
-        Math.Add
+        ElixirFBP.ComponentLoader
         
       </h1>
 
@@ -28,32 +28,34 @@
 
       
         <section id="moduledoc" class="docstring">
-          <p>This module describes an FBP Component: Math.Add</p>
+          <p>This module is responsible for loading ElixirFBP components at run time. Given
+a list of file paths, it will examine all modules, select those which implement
+the ElixirFBP.ComponentBehaviour and develop a list of Component attributes
+such as description, inports, and outports.</p>
+<p>This code is based on the <a href="https://groups.google.com/d/msg/elixir-lang-core/wEi95gzibLE/qFa12TLCPrMJ">answer</a>
+to a question about loading Elixir modules. The code is from the hex package
+manager.</p>
 
         </section>
       
 
       
-        <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/math/add.ex#L1" class="view_source">Source</a>
+        <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component_loader.ex#L1" class="view_source">Source</a>
       
 
       
         <h2 id="summary">Summary<span class="detail_header_links"><a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a></span></h2>
         <table class="summary">
           <tr>
-  <td class="summary_signature"><a href="#description/0">description()</a></td>
+  <td class="summary_signature"><a href="#get_components/1">get_components(module_list)</a></td>
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#inports/0">inports()</a></td>
+  <td class="summary_signature"><a href="#is_component?/1">is_component?(module)</a></td>
   
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#loop/2">loop(inports, outports)</a></td>
-  
-</tr>
-<tr>
-  <td class="summary_signature"><a href="#outports/0">outports()</a></td>
+  <td class="summary_signature"><a href="#retrieve_components/1">retrieve_components(paths)</a></td>
   
 </tr>
 
@@ -66,11 +68,11 @@
         <section id="functions_details" class="details_list">
           <h2>Functions</h2>
           <section class="detail">
-  <div class="detail_header" id="description/0">
-    <span class="signature"><strong>description()</strong></span>
+  <div class="detail_header" id="get_components/1">
+    <span class="signature"><strong>get_components(module_list)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
-      <a href="#description/0" class="detail_link" title="Link to this function">#</a>
+      <a href="#get_components/1" class="detail_link" title="Link to this function">#</a>
       <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
     </div>
   </div>
@@ -79,15 +81,15 @@
     
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/math/add.ex#L5" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component_loader.ex#L28" class="view_source">Source</a>
   
 </section>
 <section class="detail">
-  <div class="detail_header" id="inports/0">
-    <span class="signature"><strong>inports()</strong></span>
+  <div class="detail_header" id="is_component?/1">
+    <span class="signature"><strong>is_component?(module)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
-      <a href="#inports/0" class="detail_link" title="Link to this function">#</a>
+      <a href="#is_component?/1" class="detail_link" title="Link to this function">#</a>
       <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
     </div>
   </div>
@@ -96,15 +98,15 @@
     
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/math/add.ex#L6" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component_loader.ex#L20" class="view_source">Source</a>
   
 </section>
 <section class="detail">
-  <div class="detail_header" id="loop/2">
-    <span class="signature"><strong>loop(inports, outports)</strong></span>
+  <div class="detail_header" id="retrieve_components/1">
+    <span class="signature"><strong>retrieve_components(paths)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
-      <a href="#loop/2" class="detail_link" title="Link to this function">#</a>
+      <a href="#retrieve_components/1" class="detail_link" title="Link to this function">#</a>
       <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
     </div>
   </div>
@@ -113,24 +115,7 @@
     
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/math/add.ex#L9" class="view_source">Source</a>
-  
-</section>
-<section class="detail">
-  <div class="detail_header" id="outports/0">
-    <span class="signature"><strong>outports()</strong></span>
-    <div class="detail_header_links">
-      <span class="detail_type">(function)</span>
-      <a href="#outports/0" class="detail_link" title="Link to this function">#</a>
-      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
-    </div>
-  </div>
-  
-  <section class="docstring">
-    
-  </section>
-  
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/math/add.ex#L7" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component_loader.ex#L13" class="view_source">Source</a>
   
 </section>
 

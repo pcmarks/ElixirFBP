@@ -37,12 +37,26 @@ IPs - typically after some computation - out the out ports</p>
   
 </tr>
 <tr>
+  <td class="summary_signature"><a href="ElixirFBP.Behaviour.html">ElixirFBP.Behaviour</a></td>
+  
+</tr>
+<tr>
   <td class="summary_signature"><a href="ElixirFBP.Component.html">ElixirFBP.Component</a></td>
   
     <td class="summary_synopsis"><p>Component is used to start an FBP component. It takes the component’s name -
 an Elixir module name - and spawns a process. It is assumed that the component
 module supports a loop function which will be called when the component is
 spawned</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="ElixirFBP.ComponentLoader.html">ElixirFBP.ComponentLoader</a></td>
+  
+    <td class="summary_synopsis"><p>This module is responsible for loading ElixirFBP components at run time. Given
+a list of file paths, it will examine all modules, select those which implement
+the ElixirFBP.ComponentBehaviour and develop a list of Component attributes
+such as description, inports, and outports</p>
 </td>
   
 </tr>

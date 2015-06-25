@@ -36,7 +36,10 @@ that may be used to construct FBP programs.</p>
 It is expected that this is a pid to which messages can be sent and that are
 understood by that particular client. For example, if the client-runtime
 connection is via Websockets then this pid is a Websocket handler.</p>
-<p>Most data is loaded dynamically at GenServer start time but can be
+<p>The list of components that are available to users of this runtime are stored
+in the state. This list will be used as a response to a client request for a
+list of components.</p>
+<p>Most data are loaded dynamically at GenServer start time but can be
 updated after initialization.</p>
 <p>The GenServer is registered with the name of this module.</p>
 
@@ -148,7 +151,7 @@ client should know how to parse this message</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L46" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L50" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -166,7 +169,7 @@ client should know how to parse this message</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L31" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L35" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -185,7 +188,7 @@ Start up a Network and initialize the Runtime state.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L31" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L35" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -204,7 +207,7 @@ communicate with.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L61" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L65" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -223,7 +226,7 @@ client should know how to parse this message.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L77" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L81" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -242,7 +245,7 @@ client should know how to parse this message.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L69" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L73" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -260,7 +263,7 @@ client should know how to parse this message.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L53" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L57" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -278,7 +281,7 @@ client should know how to parse this message.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L39" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L43" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -296,7 +299,7 @@ client should know how to parse this message.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L84" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L88" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -314,7 +317,7 @@ client should know how to parse this message.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L31" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/runtime.ex#L35" class="view_source">Source</a>
   
 </section>
 

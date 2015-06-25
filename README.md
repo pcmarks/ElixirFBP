@@ -35,6 +35,12 @@ knows how to handle FBP protocol network commands.
 ElixirFBP.Graph keeps track of the FBP graph that is currently being built and/or
 run. It knows how to handle FBP protocol graph commands.
 
+The Elixir Cowboy [package](https://github.com/ninenines/cowboy) provides web socket
+support for both the sending and receiving of 
+frames. The module FBPNetwork.FBPHandler is used by Cowboy to parse NoFlo protocol
+messages and to call the appropriate function in the Runtime, Network, and Graph
+GenServers.
+
 # Limitations
 * The components for this runtime are hard-wired in ElixirFBP. A "discovery"
 mechanism to locate Elixir components will be implemented in a future release.
