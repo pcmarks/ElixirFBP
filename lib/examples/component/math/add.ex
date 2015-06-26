@@ -2,6 +2,8 @@ defmodule Math.Add do
   @moduledoc """
   This module describes an FBP Component: Math.Add
   """
+  @behaviour ElixirFBP.Behaviour
+
   def description, do: "Add two integers"
   def inports, do: [addend: :integer, augend: :integer]
   def outports, do: [sum: :integer]
