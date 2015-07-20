@@ -54,6 +54,8 @@ defmodule ElixirFBP.Graph do
                 started: boolean,
                 graph: atom}
 
+  import ElixirFBP.Subscription
+
   use GenServer
 
   ########################################################################
@@ -221,7 +223,7 @@ defmodule ElixirFBP.Graph do
     GenServer.call(fbp_graph_reg_name, :stop)
   end
 
-  ########################################################################
+  ##############################################################################
   # The GenServer implementations
 
   @doc """
@@ -267,30 +269,43 @@ defmodule ElixirFBP.Graph do
     reg_name = fbp_graph.registered_name
     nodes = :digraph.vertices(fbp_graph.graph)
     # Verify that all out ports on all the nodes are connected to something
-    all_ok = verify_out_ports(fbp_graph.graph)
-    case all_ok do
+    problems = verify_out_ports(fbp_graph.graph)
+    case problems do
       [] ->
-      # For every component in the graph:
-      #   start the process - constructing outport process id's to send to
-      Enum.each(nodes, fn (node) ->
+      # For every component in the graph, start its processes:
+      # resulting in a HashDict of node_id / list of component pids
+      node_processes = Enum.map(nodes, fn (node) ->
         {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
         ElixirFBP.Component.start(reg_name, node_id, label, fbp_graph.graph) end)
+        |> Enum.into(HashDict.new)
+      # Now start up all of the subscriptions; there should be one per edge
+      # Collect all the subscription pids
+      edges = :digraph.edges(fbp_graph.graph)
+      subscription_pids = Enum.map(edges, fn (edge) ->
+        {_edge_id, node_in, node_out, label} = :digraph.edge(fbp_graph.graph, edge)
+        %{src_port: src_port, tgt_port: tgt_port, metadata: _metadata} = label
+        subscription = ElixirFBP.Subscription.new(
+          HashDict.get(node_processes, node_in),
+          src_port,
+          HashDict.get(node_processes, node_out),
+          tgt_port)
+        ElixirFBP.Subscription.start(subscription)
+      end)
+      # TODO: Figure out how to pull a different number of values
+      Enum.each(subscription_pids, fn(subscription_pid) ->
+        send(subscription_pid, {:pull, 1})
+      end)
       # For every component's inport, see if there is an initial value. If so,
       # send this value to all of processes that have been spawned for this
       # component. We do not use Component.send_ip for this type of message.
       Enum.each(nodes, fn(node) ->
         {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
         inports = label.inports
+        node_pids = HashDict.get(node_processes, node_id)
         for {port, value} <- inports do
           if value != nil do
-            number_of_processes = label.metadata[:number_of_processes]
-            Enum.each(Range.new(1, number_of_processes), fn(process_no) ->
-              process_reg_name = String.to_atom(
-                                        Atom.to_string(reg_name)
-                                        <> "_"
-                                        <> node_id
-                                        <> "_#{process_no}")
-              send(process_reg_name, {port, value})
+            Enum.each(node_pids, fn(node_pid) ->
+              send(node_pid, {port, value})
             end)
           end
         end
@@ -298,7 +313,8 @@ defmodule ElixirFBP.Graph do
       new_fbp_graph = %ElixirFBP.Graph{fbp_graph | started: true, running: true}
       {:reply, :ok, new_fbp_graph}
     _ ->
-      {:reply, all_ok, fbp_graph}
+      # There were problems checking the out ports
+      {:reply, problems, fbp_graph}
     end
   end
 
@@ -377,7 +393,7 @@ defmodule ElixirFBP.Graph do
   Callback implementation for ElixirFBP.Graph.rename_node()
   """
   def handle_call({:rename_node, from, to, secret}, _req, fbp_graph) do
-    {vertex, label} = :digraph.vertex(fbp_graph.graph, from)
+    {_vertex, label} = :digraph.vertex(fbp_graph.graph, from)
     new_vertex = :digraph.add_vertex(fbp_graph.graph, to, label)
     :digraph.del_vertex(fbp_graph.graph, from)
     {:reply, new_vertex, fbp_graph}

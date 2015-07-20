@@ -20,9 +20,8 @@ defmodule ElixirFBP.Component do
   default value is one), each identified with a process name of the atom value
   of graph_id <> "_" <> node_id <> process_number, where process_number
   goes from 1 to number_of_processes.
-  Return {:ok, process name, number} or {:error, reason} where process name
-  (string) is the spawned process root name and number is the number of processes
-  started.
+  Return a tuple with a key of the node_id and a value of a
+  list of pids corresponding to the spawned component processes.
   """
   def start(graph_reg_name, node_id, label, fbp_graph) do
     # IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
@@ -35,7 +34,6 @@ defmodule ElixirFBP.Component do
     # function for a component. The in port arguments are nil but the out port
     # arguments need to be set up with the name of the component process that
     # it is connected to.
-    #inport_args = List.duplicate(nil, length(inports))
     inport_args = inports |> Enum.map(fn({k, _v}) -> {k, nil} end) |> Enum.into(%{})
     outport_args = prepare_outport_args(graph_reg_name, node_id, fbp_graph) |>
                     Enum.into(%{})
@@ -44,12 +42,9 @@ defmodule ElixirFBP.Component do
     number_of_processes = label.metadata[:number_of_processes]
     # We can spawn all of the component processes now,
     # asking each component process to execute its loop function.
-    Enum.each(Range.new(1, number_of_processes), fn(process_no) ->
-      process_pid = spawn(module, :loop, [inport_args, outport_args])
-      process_reg_name_atom = String.to_atom("#{process_reg_name}_#{process_no}")
-      Process.register(process_pid, process_reg_name_atom)
-    end)
-    {process_reg_name, number_of_processes}
+    {node_id, Enum.map(1..number_of_processes, fn(_) ->
+      spawn(module, :loop, [inport_args, outport_args])
+    end)}
   end
 
   @doc """
@@ -67,28 +62,6 @@ defmodule ElixirFBP.Component do
         Process.exit(pid, :kill)      # Not really a normal exit??
       end
     end)
-  end
-
-  @doc """
-  Assemble and send an IP to an in port of a running process. If there are
-  multiple processes for this component, send it to the "next" process.
-  Return an updated target with a new next process number.
-  """
-  def send_ip(target, value) do
-    # IO.puts("\nComponent.send_ip(#{inspect target}, #{inspect value})")
-    no_of_processes = Map.get(target, :number_of_processes, 1)
-    next_process = Map.get(target, :next_process, 0)
-    processes = Map.get(target, :process_reg_names)
-    send(elem(processes, next_process), {target.inport, value})
-    if no_of_processes == 1 do
-      next_process_no = 0
-    else
-      next_process_no = next_process + 1
-      if next_process_no >= no_of_processes do
-        next_process_no = 0
-      end
-    end
-    %{target | :next_process => next_process_no}
   end
 
   @doc """

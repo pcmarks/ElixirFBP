@@ -12,21 +12,16 @@ defmodule Math.Add do
     %{:augend => augend, :addend => addend} = inports
     %{:sum => sum} = outports
     receive do
-      {:augend, value} when not is_nil(addend) ->
-        sum = ElixirFBP.Component.send_ip(sum, addend + value)
-        outports = %{outports | :sum => sum}
-        inports = %{inports | :augend => nil, :addend => nil}
+      {:addend, value} ->
+        inports = %{inports | :addend => value}
         loop(inports, outports)
       {:augend, value} ->
         inports = %{inports | :augend => value}
         loop(inports, outports)
-      {:addend, value} when not is_nil(augend) ->
-        sum = ElixirFBP.Component.send_ip(sum, value + augend)
+      {:sum, subscription_pid} when is_number(addend) and is_number(augend) ->
+        sum = addend + augend
         outports = %{outports | :sum => sum}
-        inports = %{inports | :augend => nil, :addend => nil}
-        loop(inports, outports)
-      {:addend, value} ->
-        inports = %{inports | :addend => value}
+        send(subscription_pid, {:sum, sum})
         loop(inports, outports)
     end
   end
