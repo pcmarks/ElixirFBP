@@ -297,7 +297,7 @@ defmodule ElixirFBP.Graph do
       end)
       # For every component's inport, see if there is an initial value. If so,
       # send this value to all of processes that have been spawned for this
-      # component. We do not use Component.send_ip for this type of message.
+      # component.
       Enum.each(nodes, fn(node) ->
         {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
         inports = label.inports
