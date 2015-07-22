@@ -31,13 +31,9 @@ defmodule ElixirFBP.Component do
 
     # Spawning a process requires a module name - Note that we have to prepend
     # the component name with "Elxir" and a list of argument values - to the loop
-    # function for a component. The in port arguments are nil but the out port
-    # arguments need to be set up with the name of the component process that
-    # it is connected to.
+    # function for a component.
     inport_args = inports |> Enum.map(fn({k, _v}) -> {k, nil} end) |> Enum.into(%{})
-    outport_args = prepare_outport_args(graph_reg_name, node_id, fbp_graph) |>
-                    Enum.into(%{})
-    process_reg_name = Atom.to_string(graph_reg_name) <> "_" <> node_id
+    outport_args =  outports |> Enum.map(fn({k, _v}) -> {k, nil} end) |> Enum.into(%{})
     module = Module.concat("Elixir", label.component)
     number_of_processes = label.metadata[:number_of_processes]
     # We can spawn all of the component processes now,

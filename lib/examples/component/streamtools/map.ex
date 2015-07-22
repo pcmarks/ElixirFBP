@@ -17,9 +17,11 @@ defmodule Streamtools.Map do
         inports = %{inports | :map => value}
         loop(inports, outports)
       {:in_port, value} ->
-        inports = %{inports | :in_port => value}
-        out = Component.send_ip(out, map)
-        outports = %{outports | :out => out}
+        outports = %{outports | :out => map}
+        loop(inports, outports)
+      {:out, subscription} when out != nil ->
+        send(subscription, {:out, out})
+        outports = %{outports | :out => nil}
         loop(inports, outports)
     end
   end

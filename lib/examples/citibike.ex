@@ -26,7 +26,7 @@ defmodule Examples.Citibike do
     Graph.add_node(fbp_graph_reg_name, @unpack, "Streamtools.Unpack")
     Graph.add_node(fbp_graph_reg_name, @filter, "Streamtools.Filter")
     Graph.add_node(fbp_graph_reg_name, @output, "Core.Output")
-    # Connect the components
+    # # Connect the components
     Graph.add_edge(fbp_graph_reg_name, @ticker, :out, @map, :in_port)
     Graph.add_edge(fbp_graph_reg_name, @map, :out, @getHTTP, :path)
     Graph.add_edge(fbp_graph_reg_name, @getHTTP, :out, @unpack, :in_port)

@@ -19,16 +19,15 @@ defmodule Streamtools.Filter do
       {:filter_value, value} ->
         inports = %{inports | :filter_value => value}
         loop(inports, outports)
-      {:in_port, data} ->
-        for datum <- data do
-          filter =
-          if datum[filter] == filter_value do
-            out = Component.send_ip(out, datum)
-            outports = %{outports | :out => out}
-          end
-        end
+      {:in_port, data} when out == nil ->
+        out = Enum.filter(data, fn(datum) ->
+          datum[filter] == filter_value end)
+        outports = %{outports | :out => out}
+        loop(inports, outports)
+      {:out, subscription} when out != nil ->
+        send(subscription, {:out, out})
+        outports = %{outports | :out => nil}
         loop(inports, outports)
     end
   end
-
 end

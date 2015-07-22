@@ -21,8 +21,9 @@ ElixirFBP consists of a set of Elixir modules:
 * ElixirFBP.Runtime
 * ElixirFBP.Network
 * ElixirFBP.Graph
+* ElixirFBP.Subscription
 
-These three modules are implemented as Elixir [GenServers](http://elixir-lang.org/docs/stable/elixir/GenServer.html)
+The first three modules are implemented as Elixir [GenServers](http://elixir-lang.org/docs/stable/elixir/GenServer.html)
 
 ElixirFBP.Runtime is responsible for communicating with a client who understands
 the FBP network protocol and for keeping track of the graph that is being built/run.
@@ -35,8 +36,14 @@ knows how to handle FBP protocol network commands.
 ElixirFBP.Graph keeps track of the FBP graph that is currently being built and/or
 run. It knows how to handle FBP protocol graph commands.
 
-The Elixir Cowboy [package](https://github.com/ninenines/cowboy) provides web socket
-support for both the sending and receiving of 
+An ElixirFBP.Subscription serves as connection between any two components, hence
+there is one Subscription per FBP graph edge. The components correspond to the
+publisher and subscriber in the [Reactive Stream protocol](http://www.reactive-streams.org/). A Subscription can limit the number of Information Packets that can be sent from a
+publisher to a subscriber, that is, "back pressure" can be applied to the
+publisher.
+
+The [Elixir Cowboy package](https://github.com/ninenines/cowboy) provides web socket
+support for both the sending and receiving of
 frames. The module FBPNetwork.FBPHandler is used by Cowboy to parse NoFlo protocol
 messages and to call the appropriate function in the Runtime, Network, and Graph
 GenServers.

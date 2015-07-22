@@ -18,8 +18,11 @@ defmodule Streamtools.Unpack do
         loop(inports, outports)
       {:in_port, value} ->
         inports = %{inports | :in_port => value}
-        out = Component.send_ip(out, value[part])
-        outports = %{outports | :out => out}
+        outports = %{outports | :out => value[part]}
+        loop(inports, outports)
+      {:out, subscription} when out != nil ->
+        send(subscription, {:out, out})
+        outports = %{outports | :out => nil}
         loop(inports, outports)
     end
   end

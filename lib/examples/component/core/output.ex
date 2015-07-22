@@ -7,10 +7,8 @@ defmodule Core.Output do
   def loop(inports, outports) do
     %{:in_port => in_port} = inports
     receive do
-      {:in_port, value} ->
+      {:in_port, value} when value != nil ->
         IO.puts("\nCore.Output:in_port = #{inspect value}")
-        loop(inports, outports)
-      _whatever ->
         loop(inports, outports)
     end
   end

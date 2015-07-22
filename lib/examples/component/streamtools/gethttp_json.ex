@@ -17,8 +17,10 @@ defmodule Streamtools.GetHTTPJSON do
         inports = %{inports | :path => value}
         {:ok, %HTTPoison.Response{body: body}} = HTTPoison.get(value)
         e_body = Poison.decode!(body)
-        out = Component.send_ip(out, e_body)
-        outports = %{outports | :out => out}
+        outports = %{outports | :out => e_body}
+        loop(inports, outports)
+      {:out, subscription} when out != nil ->
+        send(subscription, {:out, out})
         loop(inports, outports)
     end
   end
