@@ -69,10 +69,11 @@ defmodule ElixirFBP.Network do
   end
 
   @doc """
-  Start execution of a graph
+  Start execution of a graph, optionally specifing the pull count (integer or
+  :infinity(default))
   """
-  def start(graph_id) do
-    GenServer.call(__MODULE__, {:start, graph_id})
+  def start(graph_id, pull_count \\ :infinity) do
+    GenServer.call(__MODULE__, {:start, graph_id, pull_count})
   end
 
   @doc """
@@ -159,12 +160,12 @@ defmodule ElixirFBP.Network do
   @doc """
   Callback implementation for ElixirFBP.Network.start()
   """
-  def handle_call({:start, graph_id}, _req, network) do
+  def handle_call({:start, graph_id, pull_count}, _req, network) do
     reg_name = HashDict.get(network.graph_reg_names, graph_id)
     if ! reg_name do
       {:reply, {:error, "Graph does not exist"}, network}
     else
-      case Graph.start(reg_name) do
+      case Graph.start(reg_name, pull_count) do
         {:ok} ->
           {:reply, :ok, network}
         error ->

@@ -16,7 +16,7 @@ defmodule Examples.Citibike do
   @filter         "filter"
   @output         "output"
 
-  def start do
+  def start(pull_count \\ :infinity) do
     Network.start_link
     {:ok, fbp_graph_reg_name} = Network.clear(@citibike)
     # Add the components to the graph
@@ -41,6 +41,6 @@ defmodule Examples.Citibike do
     Graph.add_initial(fbp_graph_reg_name, "stationName", @filter, :filter)
     Graph.add_initial(fbp_graph_reg_name, "W 41 St & 8 Ave", @filter, :filter_value)
     # Start the flow
-    Network.start(@citibike)
+    Network.start(@citibike, pull_count)
   end
 end
