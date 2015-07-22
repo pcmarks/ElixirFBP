@@ -291,9 +291,10 @@ defmodule ElixirFBP.Graph do
           tgt_port)
         ElixirFBP.Subscription.start(subscription)
       end)
-      # TODO: Figure out how to pull a different number of values
+      # TODO: Figure out how to pull a different number of values, it should
+      # be based on what the subscriber can handle.
       Enum.each(subscription_pids, fn(subscription_pid) ->
-        send(subscription_pid, {:pull, 1})
+        send(subscription_pid, {:pull, :infinity})
       end)
       # For every component's inport, see if there is an initial value. If so,
       # send this value to all of processes that have been spawned for this
