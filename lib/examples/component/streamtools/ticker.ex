@@ -2,6 +2,7 @@ defmodule Streamtools.Ticker do
   @moduledoc """
   Based on a similar component at http://blog.nytlabs.com/streamtools/
   Send out a message every interval milliseconds
+  TODO: Still not implemented correctly.
   """
   use Timex
   alias ElixirFBP.Component
