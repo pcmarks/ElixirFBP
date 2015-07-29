@@ -2,7 +2,7 @@ defmodule Examples.Add2 do
   alias ElixirFBP.Graph
   alias ElixirFBP.Network
 
-  @graph_1      "graph_n1"
+  @graph_1      "graph_n2"
   @add_1        "add_1"
   @node_2       "node_2"
   @add_2        "add_2"

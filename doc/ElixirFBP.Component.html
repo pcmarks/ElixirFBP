@@ -32,9 +32,6 @@
 an Elixir module name - and spawns a process. It is assumed that the component
 module supports a loop function which will be called when the component is
 spawned.</p>
-<p>Component is also used to send data to a specific port on a specific node. The
-node has already been spawned and is identified by the atom representation of
-its node name.</p>
 
         </section>
       
@@ -47,29 +44,10 @@ its node name.</p>
         <h2 id="summary">Summary<span class="detail_header_links"><a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a></span></h2>
         <table class="summary">
           <tr>
-  <td class="summary_signature"><a href="#send_ip/2">send_ip(target, value)</a></td>
+  <td class="summary_signature"><a href="#start/5">start(component, node_id, inports, outports, no_of_processes \\ 1)</a></td>
   
-    <td class="summary_synopsis"><p>Assemble and send an IP to an in port of a running process. If there are
-multiple processes for this component, send it to the “next” process.
-Return an updated target with a new next process number</p>
-</td>
-  
-</tr>
-<tr>
-  <td class="summary_signature"><a href="#start/4">start(graph_reg_name, node_id, label, fbp_graph)</a></td>
-  
-    <td class="summary_synopsis"><p>Start the execution of a component in its own process(es).
-This function can figure out a component’s inports and outports by accessing
-the respective function in the component module definition, e.g.
-Math.Add.inports. The argument label refers to the label value associated with
-the Erlang :digraph vertex.
-Spawn as many process as are specified in the metadata :number<em>of_processes value (the
-default value is one), each identified with a process name of the atom value
-of graph_id &lt;&gt; “</em>“ &lt;&gt; node_id &lt;&gt; process_number, where process_number
-goes from 1 to number_of_processes.
-Return {:ok, process name, number} or {:error, reason} where process name
-(string) is the spawned process root name and number is the number of processes
-started</p>
+    <td class="summary_synopsis"><p>Start the execution of a component in its own process(es). Spawn as many
+processes as are specified in the no_of_processes value (the default value is one)</p>
 </td>
   
 </tr>
@@ -91,52 +69,29 @@ unregister it and force an exit</p>
         <section id="functions_details" class="details_list">
           <h2>Functions</h2>
           <section class="detail">
-  <div class="detail_header" id="send_ip/2">
-    <span class="signature"><strong>send_ip(target, value)</strong></span>
+  <div class="detail_header" id="start/5">
+    <span class="signature"><strong>start(component, node_id, inports, outports, no_of_processes \\ 1)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
-      <a href="#send_ip/2" class="detail_link" title="Link to this function">#</a>
+      <a href="#start/5" class="detail_link" title="Link to this function">#</a>
       <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
     </div>
   </div>
   
   <section class="docstring">
-    <p>Assemble and send an IP to an in port of a running process. If there are
-multiple processes for this component, send it to the “next” process.
-Return an updated target with a new next process number.</p>
+    <p>Start the execution of a component in its own process(es). Spawn as many
+processes as are specified in the no_of_processes value (the default value is one).</p>
+<p>inports is a list of {port, value} tuples where value is an initial value or
+a Subscription pid. outports is a list of {port, pid} tuples where the pid is
+a Subscription.</p>
+<p>inports and outports are used to create the initial arguments sent to a
+Component’s loop function. They are also used to create lists of component
+pids that must be sent to any Subscriptions that a component’s in or out ports
+are connected to.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L77" class="view_source">Source</a>
-  
-</section>
-<section class="detail">
-  <div class="detail_header" id="start/4">
-    <span class="signature"><strong>start(graph_reg_name, node_id, label, fbp_graph)</strong></span>
-    <div class="detail_header_links">
-      <span class="detail_type">(function)</span>
-      <a href="#start/4" class="detail_link" title="Link to this function">#</a>
-      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
-    </div>
-  </div>
-  
-  <section class="docstring">
-    <p>Start the execution of a component in its own process(es).
-This function can figure out a component’s inports and outports by accessing
-the respective function in the component module definition, e.g.
-Math.Add.inports. The argument label refers to the label value associated with
-the Erlang :digraph vertex.
-Spawn as many process as are specified in the metadata :number<em>of_processes value (the
-default value is one), each identified with a process name of the atom value
-of graph_id &lt;&gt; “</em>“ &lt;&gt; node_id &lt;&gt; process_number, where process_number
-goes from 1 to number_of_processes.
-Return {:ok, process name, number} or {:error, reason} where process name
-(string) is the spawned process root name and number is the number of processes
-started.</p>
-
-  </section>
-  
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L27" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L21" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -155,7 +110,7 @@ unregister it and force an exit.</p>
 
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L59" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/elixirFBP/component.ex#L54" class="view_source">Source</a>
   
 </section>
 

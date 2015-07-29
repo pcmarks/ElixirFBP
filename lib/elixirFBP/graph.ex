@@ -54,8 +54,6 @@ defmodule ElixirFBP.Graph do
                 started: boolean,
                 graph: atom}
 
-  import ElixirFBP.Subscription
-
   use GenServer
 
   ########################################################################
@@ -272,65 +270,70 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation of ElixirFBP.Graph.start()
   Starting a graph involves the following steps:
-    1. Spawn all components in the graph
-    2. Send all initial data values to their respective processes.
+    1. Verify that all outports are connected to something
+    2. For every edge in the graph, create and spawn a Subscription
+    3. For every node in the graph, assemble the inports and outport values
+       for a Component and then spawn the Component's process(es)
+    4. Send each Subscription a pull request to get the flow of IPs going.
 
   """
   def handle_call({:start, pull_count}, _req, fbp_graph) do
-    reg_name = fbp_graph.registered_name
     nodes = :digraph.vertices(fbp_graph.graph)
+    edges = :digraph.edges(fbp_graph.graph)
     # Verify that all out ports on all the nodes are connected to something
     problems = verify_out_ports(fbp_graph.graph)
     case problems do
       [] ->
-      # For every component in the graph, start its processes:
-      # resulting in a HashDict of node_id / list of component pids
-      node_processes = Enum.map(nodes, fn (node) ->
-        {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
-        ElixirFBP.Component.start(reg_name, node_id, label, fbp_graph.graph) end)
-        |> Enum.into(HashDict.new)
-      # Now start up all of the subscriptions; there should be one per edge
-      # Collect all the subscription pids
-      edges = :digraph.edges(fbp_graph.graph)
-      subscription_pids = Enum.map(edges, fn (edge) ->
-        {_edge_id, node_in, node_out, label} = :digraph.edge(fbp_graph.graph, edge)
-        %{src_port: src_port, tgt_port: tgt_port, metadata: _metadata} = label
-        subscription = ElixirFBP.Subscription.new(
-          HashDict.get(node_processes, node_in),
-          src_port,
-          HashDict.get(node_processes, node_out),
-          tgt_port)
-        subscription_pid = ElixirFBP.Subscription.start(subscription)
-        new_label = %{label | :subscription_pid => subscription_pid}
-        :digraph.add_edge(
-                        fbp_graph.graph,
-                        node_in, node_out, new_label)
-        subscription_pid
-      end)
-
-      Enum.each(subscription_pids, fn(subscription_pid) ->
-        send(subscription_pid, {:pull, pull_count})
-      end)
-      # For every component's inport, see if there is an initial value. If so,
-      # send this value to all of processes that have been spawned for this
-      # component.
-      Enum.each(nodes, fn(node) ->
-        {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
-        inports = label.inports
-        node_pids = HashDict.get(node_processes, node_id)
-        for {port, value} <- inports do
-          if value != nil do
-            Enum.each(node_pids, fn(node_pid) ->
-              send(node_pid, {port, value})
-            end)
-          end
-        end
-      end)
-      new_fbp_graph = %ElixirFBP.Graph{fbp_graph | started: true, running: true}
-      {:reply, :ok, new_fbp_graph}
-    _ ->
-      # There were problems checking the out ports
-      {:reply, problems, fbp_graph}
+        # Start a subscription for each edge; save the subscription's pid in a
+        # Map for later lookup. The key values are the tuples {node_in, src_port}
+        # and {node_out, tgt_ports}
+        subscription_map = Enum.map(edges, fn(edge) ->
+          {_edge_id, node_in, node_out, label} = :digraph.edge(fbp_graph.graph, edge)
+          %{src_port: src_port, tgt_port: tgt_port} = label
+          subscription_pid = ElixirFBP.Subscription.start(src_port, tgt_port)
+          # Process.register(subscription_pid, :sub1)
+          new_label = %{label | :subscription_pid => subscription_pid}
+          :digraph.add_edge(
+                          fbp_graph.graph,
+                          edge,
+                          node_in,
+                          node_out,
+                          new_label)
+          [{{node_in, src_port}, subscription_pid},
+           {{node_out, tgt_port}, subscription_pid}]
+        end) |> List.flatten() |> Enum.into(%{})
+        # Create the initial inport and outport values for a Component.
+        # Spawn 1 or more processes for a Component
+        Enum.each(nodes, fn(node) ->
+          {node_id, label} = :digraph.vertex(fbp_graph.graph, node)
+          %{component: component, inports: inports, outports: outports} = label
+          # inports will have either a Subscription pid or an initial value
+          inps = Enum.map(inports, fn
+            {inport, nil} ->
+              subscription_pid = Map.get(subscription_map, {node_id, inport})
+              {inport, subscription_pid}
+            {inport, value} ->
+              {inport, value}
+            end) |> Enum.into(%{})
+          # outports will have a Subscription pid as a value
+          outps = Enum.map(outports, fn({outport, _}) ->
+            subscription_pid = Map.get(subscription_map, {node_id, outport})
+            {outport, subscription_pid}
+          end) |> Enum.into(%{})
+          # IO.puts("Component.start: #{component},#{node_id},#{inspect inps},#{inspect outps}")
+          ElixirFBP.Component.start(component, node_id, inps, outps)
+        end)
+        # Send every Subscription a request to get the flow started.
+        Enum.each(edges, fn(edge) ->
+          {_edge_id, _node_in, _node_out, label} = :digraph.edge(fbp_graph.graph, edge)
+          %{subscription_pid: subscription_pid} = label
+          send(subscription_pid, {:request, pull_count})
+        end)
+        new_fbp_graph = %ElixirFBP.Graph{fbp_graph | started: true, running: true}
+        {:reply, :ok, new_fbp_graph}
+      _ ->
+        # There were problems whilst checking the out ports
+        {:reply, problems, fbp_graph}
     end
   end
 
@@ -419,7 +422,7 @@ defmodule ElixirFBP.Graph do
   Callback implementation for ElixirFBP.Graph.change_node()
   """
   def handle_call({:change_node, id, metadata, secret}, _req, fbp_graph) do
-    {vertex, label} = :digraph.vertex(fbp_graph.graph, id)
+    {_vertex, label} = :digraph.vertex(fbp_graph.graph, id)
     current_metadata = label.metadata
     new_metadata = Map.merge(current_metadata, metadata)
     new_label = %{label | :metadata => new_metadata}
@@ -447,8 +450,8 @@ defmodule ElixirFBP.Graph do
   Callback implementation for ElixirFBP.Graph.remove_edge()
   """
   def handle_call({:remove_edge,
-                    src_node_id, src_port,
-                    tgt_node_id, tgt_port},
+                    src_node_id, _src_port,
+                    tgt_node_id, _tgt_port},
                     _req, fbp_graph) do
     result = :digraph.del_path(fbp_graph.graph, src_node_id, tgt_node_id)
     {:reply, result, fbp_graph}
@@ -458,8 +461,8 @@ defmodule ElixirFBP.Graph do
   Callback implementation for ElixirFBP.Graph.change_edge()
   """
   def handle_call({:change_edge,
-                    src_node_id, src_port,
-                    tgt_node_id, tgt_port,
+                    src_node_id, _src_port,
+                    tgt_node_id, _tgt_port,
                     metadata, secret},
                     _req, fbp_graph) do
     edges = :digraph.out_edges(fbp_graph.graph, src_node_id)
@@ -469,8 +472,9 @@ defmodule ElixirFBP.Graph do
         current_metadata = label.metadata
         new_metadata = Map.merge(current_metadata, metadata)
         new_label = %{label | :metadata => new_metadata}
-        new_edge = :digraph.add_edge(
+        :digraph.add_edge(
                         fbp_graph.graph,
+                        edge,
                         src_node_id,
                         tgt_node_id,
                         new_label)
@@ -483,8 +487,8 @@ defmodule ElixirFBP.Graph do
   Callback implementation for ElixirFBP.Graph.get_subscription()
   """
   def handle_call({:get_subscription,
-                    src_node_id, src_port,
-                    tgt_node_id, tgt_port}, _req, fbp_graph) do
+                    src_node_id, _src_port,
+                    tgt_node_id, _tgt_port}, _req, fbp_graph) do
     edges = :digraph.out_edges(fbp_graph.graph, src_node_id)
     subscription_pids = Enum.map(edges,
         fn(edge) ->
@@ -500,7 +504,7 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation for ElixirFBP.Graph.add_initial()
   """
-  def handle_call({:add_initial, data, node_id, port, metadata}, _req, fbp_graph) do
+  def handle_call({:add_initial, data, node_id, port, _metadata}, _req, fbp_graph) do
     {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
     inports = label.inports
     inport_types = label.inport_types
@@ -556,7 +560,7 @@ defmodule ElixirFBP.Graph do
   @doc """
   Callback implementation triggered by asking the GenServer to :stop
   """
-  def terminate(reason, fbp_graph) do
+  def terminate(_reason, _fbp_graph) do
     :ok
   end
 

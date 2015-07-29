@@ -11,7 +11,6 @@ defmodule Streamtools.Filter do
 
   def loop(inports, outports) do
     %{:filter => filter, :filter_value => filter_value, :in_port => in_port} = inports
-    %{:out => out} = outports
     receive do
       {:filter, value} ->
         inports = %{inports | :filter => value}
@@ -19,14 +18,14 @@ defmodule Streamtools.Filter do
       {:filter_value, value} ->
         inports = %{inports | :filter_value => value}
         loop(inports, outports)
-      {:in_port, data} when out == nil ->
-        out = Enum.filter(data, fn(datum) ->
-          datum[filter] == filter_value end)
-        outports = %{outports | :out => out}
+      {:in_port, data} ->
+        inports = %{inports | :in_port => data}
         loop(inports, outports)
-      {:out, subscription} when out != nil ->
-        send(subscription, {:out, out})
-        outports = %{outports | :out => nil}
+      :out when in_port != nil ->
+        out = Enum.filter(in_port, fn(in_port) ->
+          in_port[filter] == filter_value end)
+        send(outports[:out], {:out, out})
+        inports = %{inports | :in_port => nil}
         loop(inports, outports)
     end
   end

@@ -18,9 +18,11 @@ defmodule Streamtools.Ticker do
       {:interval, value} ->
         inports = %{inports | :interval => value}
         loop(inports, outports)
-      {:out, subscription} when interval != nil ->
-        Stream.timer(interval) |> Enum.take(1)
-        send(subscription, {:out, DateFormat.format!(Date.now, "{RFC1123}")})
+      :out when interval != nil ->
+        Process.send_after(outports[:out],
+                   {:out, DateFormat.format!(Date.now, "{RFC1123}")},
+                   interval)
+        send(self(), :out)
         loop(inports, outports)
     end
   end

@@ -69,6 +69,13 @@ maintainance of an FBP Graph</p>
   
 </tr>
 <tr>
+  <td class="summary_signature"><a href="ElixirFBP.InitialInformationPacket.html">ElixirFBP.InitialInformationPacket</a></td>
+  
+    <td class="summary_synopsis"><p>A special component that can deliver a constant</p>
+</td>
+  
+</tr>
+<tr>
   <td class="summary_signature"><a href="ElixirFBP.Network.html">ElixirFBP.Network</a></td>
   
     <td class="summary_synopsis"><p>ElxirFBP.Network is a GenServer that provides support for starting and stopping a
@@ -85,6 +92,17 @@ Graphs are implemented as GenServers</p>
 runtime capabilites of a particular instance of ElixirFBP. In its structure,
 it stores descriptive data, a list of capabilities and a list of components
 that may be used to construct FBP programs</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="ElixirFBP.Subscription.html">ElixirFBP.Subscription</a></td>
+  
+    <td class="summary_synopsis"><p>A Subscription serves as a conduit through which requests for data from
+Publishers (Components) are delivered to Subscribers (Components). A Subscriber
+must specify how many IPs it is willing to receive via a {:request, n} message
+where n is some number or the atom :infinity. The Subscription will not send
+any more IPs than have been asked for</p>
 </td>
   
 </tr>
@@ -248,7 +266,8 @@ If, after @nodata_time milliseconds a message is not received, it sends out a
   <td class="summary_signature"><a href="Streamtools.Ticker.html">Streamtools.Ticker</a></td>
   
     <td class="summary_synopsis"><p>Based on a similar component at <a href="http://blog.nytlabs.com/streamtools/">http://blog.nytlabs.com/streamtools/</a>
-Send out a message every interval milliseconds</p>
+Send out a message every interval milliseconds
+TODO: Still not implemented correctly</p>
 </td>
   
 </tr>

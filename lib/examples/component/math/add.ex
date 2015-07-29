@@ -10,7 +10,6 @@ defmodule Math.Add do
 
   def loop(inports, outports) do
     %{:augend => augend, :addend => addend} = inports
-    %{:sum => sum} = outports
     receive do
       {:addend, value} ->
         inports = %{inports | :addend => value}
@@ -18,10 +17,8 @@ defmodule Math.Add do
       {:augend, value} ->
         inports = %{inports | :augend => value}
         loop(inports, outports)
-      {:sum, subscription_pid} when is_number(addend) and is_number(augend) ->
-        sum = addend + augend
-        outports = %{outports | :sum => sum}
-        send(subscription_pid, {:sum, sum})
+      :sum when is_number(addend) and is_number(augend) ->
+        send(outports[:sum], {:sum, addend + augend})
         loop(inports, outports)
     end
   end

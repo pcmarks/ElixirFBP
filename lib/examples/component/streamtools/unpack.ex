@@ -11,18 +11,16 @@ defmodule Streamtools.Unpack do
 
   def loop(inports, outports) do
     %{:part => part, :in_port => in_port} = inports
-    %{:out => out} = outports
     receive do
       {:part, value} ->
         inports = %{inports | :part => value}
         loop(inports, outports)
       {:in_port, value} ->
         inports = %{inports | :in_port => value}
-        outports = %{outports | :out => value[part]}
         loop(inports, outports)
-      {:out, subscription} when out != nil ->
-        send(subscription, {:out, out})
-        outports = %{outports | :out => nil}
+      :out when in_port != nil ->
+        send(outports[:out], {:out, in_port[part]})
+        inports = %{inports | :in_port => nil}
         loop(inports, outports)
     end
   end

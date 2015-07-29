@@ -26,7 +26,6 @@ defmodule ElixirFBP.Network do
   use GenServer
 
   alias ElixirFBP.Graph
-  alias ElixirFBP.Component
 
   ########################################################################
   # The External API
@@ -204,16 +203,14 @@ defmodule ElixirFBP.Network do
   @doc """
   Callback implementation for ElixirFBP.Network.data
   """
-  def handle_cast({:data, graph_id, edge_id, src, tgt, subgraph}, network) do
-    reg_name = HashDict.get(network.graph_reg_names, graph_id)
-    nodes = Graph.nodes(reg_name)
+  def handle_cast({:data, _graph_id, _edge_id, _src, _tgt, _subgraph}, network) do
     {:noreply, network}
   end
 
   @doc """
   Callback implmentation for having asked the GenServer to stop processing
   """
-  def terminate(reason, network) do
+  def terminate(_reason, network) do
     # Stop the Graph GenServers
     Enum.each(HashDict.values(network.graph_reg_names), fn(reg_name) ->
       Graph.stop(reg_name)

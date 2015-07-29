@@ -11,17 +11,16 @@ defmodule Streamtools.Map do
 
   def loop(inports, outports) do
     %{:in_port => in_port, :map => map} = inports
-    %{:out => out} = outports
     receive do
       {:map, value} ->
         inports = %{inports | :map => value}
         loop(inports, outports)
       {:in_port, value} ->
-        outports = %{outports | :out => map}
+        inports = %{inports | :in_port => map}
         loop(inports, outports)
-      {:out, subscription} when out != nil ->
-        send(subscription, {:out, out})
-        outports = %{outports | :out => nil}
+      :out when in_port != nil ->
+        send(outports[:out], {:out, in_port})
+        inports = %{inports | :in_port => nil}
         loop(inports, outports)
     end
   end

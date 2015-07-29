@@ -11,16 +11,15 @@ defmodule Streamtools.GetHTTPJSON do
 
   def loop(inports, outports) do
     %{:path => path} = inports
-    %{:out => out} = outports
     receive do
       {:path, value} ->
         inports = %{inports | :path => value}
-        {:ok, %HTTPoison.Response{body: body}} = HTTPoison.get(value)
-        e_body = Poison.decode!(body)
-        outports = %{outports | :out => e_body}
         loop(inports, outports)
-      {:out, subscription} when out != nil ->
-        send(subscription, {:out, out})
+      :out when path != nil ->
+        {:ok, %HTTPoison.Response{body: body}} = HTTPoison.get(path)
+        e_body = Poison.decode!(body)
+        send(outports[:out], {:out, e_body})
+        inports = %{inports | :path => nil}
         loop(inports, outports)
     end
   end

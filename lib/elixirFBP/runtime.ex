@@ -95,8 +95,8 @@ defmodule ElixirFBP.Runtime do
   Callback implementation for ElixirFBP.Runtime.start_link
   Start up a Network and initialize the Runtime state.
   """
-  def init(parameters) do
-    network = ElixirFBP.Network.start_link
+  def init(_parameters) do
+    ElixirFBP.Network.start_link
     #################
     # The following components are hardwired.
     # ToDo: Subsequent releases will locate all components

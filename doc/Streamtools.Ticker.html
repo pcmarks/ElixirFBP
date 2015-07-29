@@ -29,7 +29,8 @@
       
         <section id="moduledoc" class="docstring">
           <p>Based on a similar component at <a href="http://blog.nytlabs.com/streamtools/">http://blog.nytlabs.com/streamtools/</a>
-Send out a message every interval milliseconds</p>
+Send out a message every interval milliseconds
+TODO: Still not implemented correctly.</p>
 
         </section>
       
@@ -44,17 +45,29 @@ Send out a message every interval milliseconds</p>
           <tr>
   <td class="summary_signature"><a href="#description/0">description()</a></td>
   
+    <td class="summary_synopsis"><p>Callback implementation for <a href="ElixirFBP.Behaviour.html#c:description/0"><code class="inline">ElixirFBP.Behaviour.description/0</code></a></p>
+</td>
+  
 </tr>
 <tr>
   <td class="summary_signature"><a href="#inports/0">inports()</a></td>
   
+    <td class="summary_synopsis"><p>Callback implementation for <a href="ElixirFBP.Behaviour.html#c:inports/0"><code class="inline">ElixirFBP.Behaviour.inports/0</code></a></p>
+</td>
+  
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#loop/2">loop(interval, out)</a></td>
+  <td class="summary_signature"><a href="#loop/2">loop(inports, outports)</a></td>
+  
+    <td class="summary_synopsis"><p>Callback implementation for <a href="ElixirFBP.Behaviour.html#c:loop/2"><code class="inline">ElixirFBP.Behaviour.loop/2</code></a></p>
+</td>
   
 </tr>
 <tr>
   <td class="summary_signature"><a href="#outports/0">outports()</a></td>
+  
+    <td class="summary_synopsis"><p>Callback implementation for <a href="ElixirFBP.Behaviour.html#c:outports/0"><code class="inline">ElixirFBP.Behaviour.outports/0</code></a></p>
+</td>
   
 </tr>
 
@@ -77,10 +90,11 @@ Send out a message every interval milliseconds</p>
   </div>
   
   <section class="docstring">
-    
+    <p>Callback implementation for <a href="ElixirFBP.Behaviour.html#c:description/0"><code class="inline">ElixirFBP.Behaviour.description/0</code></a>.</p>
+
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/streamtools/ticker.ex#L9" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/streamtools/ticker.ex#L11" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -94,15 +108,16 @@ Send out a message every interval milliseconds</p>
   </div>
   
   <section class="docstring">
-    
+    <p>Callback implementation for <a href="ElixirFBP.Behaviour.html#c:inports/0"><code class="inline">ElixirFBP.Behaviour.inports/0</code></a>.</p>
+
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/streamtools/ticker.ex#L10" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/streamtools/ticker.ex#L12" class="view_source">Source</a>
   
 </section>
 <section class="detail">
   <div class="detail_header" id="loop/2">
-    <span class="signature"><strong>loop(interval, out)</strong></span>
+    <span class="signature"><strong>loop(inports, outports)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
       <a href="#loop/2" class="detail_link" title="Link to this function">#</a>
@@ -111,10 +126,11 @@ Send out a message every interval milliseconds</p>
   </div>
   
   <section class="docstring">
-    
+    <p>Callback implementation for <a href="ElixirFBP.Behaviour.html#c:loop/2"><code class="inline">ElixirFBP.Behaviour.loop/2</code></a>.</p>
+
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/streamtools/ticker.ex#L13" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/streamtools/ticker.ex#L15" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -128,10 +144,11 @@ Send out a message every interval milliseconds</p>
   </div>
   
   <section class="docstring">
-    
+    <p>Callback implementation for <a href="ElixirFBP.Behaviour.html#c:outports/0"><code class="inline">ElixirFBP.Behaviour.outports/0</code></a>.</p>
+
   </section>
   
-    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/streamtools/ticker.ex#L11" class="view_source">Source</a>
+    <a href="https://github.com/pcmarks/ElixirFBP/blob/master/lib/examples/component/streamtools/ticker.ex#L13" class="view_source">Source</a>
   
 </section>
 

@@ -21,7 +21,6 @@ defmodule FBPNetwork.FBPHandler do
 
   alias ElixirFBP.Network
   alias ElixirFBP.Graph
-  alias ElixirFBP.Component
 
   @doc """
   Execute a runtime protocol command.

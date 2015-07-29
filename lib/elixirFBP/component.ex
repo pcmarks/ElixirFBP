@@ -4,43 +4,47 @@ defmodule ElixirFBP.Component do
   an Elixir module name - and spawns a process. It is assumed that the component
   module supports a loop function which will be called when the component is
   spawned.
-
-  Component is also used to send data to a specific port on a specific node. The
-  node has already been spawned and is identified by the atom representation of
-  its node name.
-
   """
   @doc """
-  Start the execution of a component in its own process(es).
-  This function can figure out a component's inports and outports by accessing
-  the respective function in the component module definition, e.g.
-  Math.Add.inports. The argument label refers to the label value associated with
-  the Erlang :digraph vertex.
-  Spawn as many process as are specified in the metadata :number_of_processes value (the
-  default value is one), each identified with a process name of the atom value
-  of graph_id <> "_" <> node_id <> process_number, where process_number
-  goes from 1 to number_of_processes.
-  Return a tuple with a key of the node_id and a value of a
-  list of pids corresponding to the spawned component processes.
-  """
-  def start(graph_reg_name, node_id, label, fbp_graph) do
-    # IO.puts("Component.start(#{inspect graph_reg_name},#{inspect node_id},#{inspect component})")
-    # Retrieve the list of inports and outports for this component
-    {inports, _} = Code.eval_string(label.component <> ".inports")
-    {outports, _} = Code.eval_string(label.component <> ".outports")
+  Start the execution of a component in its own process(es). Spawn as many
+  processes as are specified in the no_of_processes value (the default value is one).
 
-    # Spawning a process requires a module name - Note that we have to prepend
-    # the component name with "Elxir" and a list of argument values - to the loop
-    # function for a component.
-    inport_args = inports |> Enum.map(fn({k, _v}) -> {k, nil} end) |> Enum.into(%{})
-    outport_args =  outports |> Enum.map(fn({k, _v}) -> {k, nil} end) |> Enum.into(%{})
-    module = Module.concat("Elixir", label.component)
-    number_of_processes = label.metadata[:number_of_processes]
-    # We can spawn all of the component processes now,
-    # asking each component process to execute its loop function.
-    {node_id, Enum.map(1..number_of_processes, fn(_) ->
-      spawn(module, :loop, [inport_args, outport_args])
-    end)}
+  inports is a list of {port, value} tuples where value is an initial value or
+  a Subscription pid. outports is a list of {port, pid} tuples where the pid is
+  a Subscription.
+
+  inports and outports are used to create the initial arguments sent to a
+  Component's loop function. They are also used to create lists of component
+  pids that must be sent to any Subscriptions that a component's in or out ports
+  are connected to.
+  """
+  def start(component, node_id, inports, outports, no_of_processes \\ 1) do
+    # IO.puts("inports: #{inspect inports}")
+    # IO.puts("outports: #{inspect outports}")
+    # Remove pids as inport values for the spawning of the component process.
+    # After the component is spawned, these pids will be used to update the
+    # Subscriptions associated with the inports.
+    inps = Enum.map(inports, fn
+      {port, pid} when is_pid(pid) ->
+        {port, nil}
+      {port, value} ->
+        {port, value}
+    end) |> Enum.into(%{})
+    outports = Enum.map(outports, fn({port, subscription} = outport) ->
+      outport
+    end) |> Enum.into(%{})
+    module = Module.concat("Elixir", component)
+    component_pids = Enum.map(1 .. no_of_processes, fn(_) ->
+      spawn(module, :loop, [inps, outports])
+    end)
+    Enum.each(outports, fn({port, subscription}) ->
+      send(subscription, {:publisher_pids, component_pids})
+    end)
+    Enum.each(inports, fn
+      {port, subscription} when is_pid(subscription) ->
+        send(subscription, {:subscriber_pids, List.to_tuple(component_pids)})
+      {port, initial_value} ->
+    end)
   end
 
   @doc """
@@ -57,30 +61,6 @@ defmodule ElixirFBP.Component do
         Process.unregister(process_name_atom)
         Process.exit(pid, :kill)      # Not really a normal exit??
       end
-    end)
-  end
-
-  @doc """
-  A private function that can assemble the process id and port name that a
-  component is connected to. The connection is between an out port and an in port.
-  If there is no connection (no edges) on this out port an error is returned.
-  """
-  defp prepare_outport_args(graph_reg_name, node_id, graph) do
-    # fbp_graph = ElixirFBP.Graph.get(graph_reg_name)
-    out_edges = :digraph.out_edges(graph, node_id)
-    Enum.map(out_edges, fn(out_edge) ->
-      {_, _src_node, tgt_node, edge_label} = :digraph.edge(graph, out_edge)
-      {tgt_node, node_label} = :digraph.vertex(graph, tgt_node)
-      number_of_processes = node_label.metadata[:number_of_processes]
-      process_reg_names =
-        Enum.map(Range.new(1, number_of_processes), fn(i) ->
-          String.to_atom(
-              Atom.to_string(graph_reg_name) <> "_" <> tgt_node <> "_#{i}")
-        end)
-      {edge_label.src_port, %{process_reg_names: List.to_tuple(process_reg_names),
-        number_of_processes: number_of_processes,
-        next_process: 0,
-        inport: edge_label.tgt_port}}
     end)
   end
 
