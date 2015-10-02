@@ -2,7 +2,7 @@ defmodule ElixirFBP.Component do
   @moduledoc """
   Component is used to start an FBP component. It takes the component's name -
   an Elixir module name - and spawns a process. It is assumed that the component
-  module supports a loop function which will be called when the component is
+  module supports a loop function which will be called once the component is
   spawned.
   """
   @doc """

@@ -1,10 +1,13 @@
 defmodule ElixirFBP.Mixfile do
+  # alias ElixirFBP.Network
+  # alias ElixirFBP.Graph
+
   use Mix.Project
 
   def project do
     [app: :elixirFBP,
      version: "0.0.1",
-     elixir: "~> 1.0",
+     elixir: "~> 1.1",
      name: "ElixirFBP",
      source_url: "https://github.com/pcmarks/ElixirFBP",
      deps: deps]
@@ -15,7 +18,7 @@ defmodule ElixirFBP.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [applications: [],
-     registered: [:ElixirFBP.Network, :ElixirFBP.Graph]]
+     registered: [ElixirFBP.Network, ElixirFBP.Graph]]
   end
 
   # Dependencies can be Hex packages:

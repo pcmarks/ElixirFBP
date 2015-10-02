@@ -1,31 +1,33 @@
 defmodule ElixirFBP.Subscription do
   @moduledoc """
-  A Subscription serves as a conduit through which requests for data from
-  Publishers (Components) are delivered to Subscribers (Components). A Subscriber
+  A Subscription serves as a conduit and a control mechanism for the delivery of
+  data from Publishers (Components) to Subscribers (Components). A Subscriber
   must specify how many IPs it is willing to receive via a {:request, n} message
-  where n is some number or the atom :infinity. The Subscription will not send
-  any more IPs than have been asked for.
+  where n is some integer or the atom :infinity. The Subscription will ensure that
+  no more IPs than have been asked for will be sent.
 
   When a subscriber asks for an infinite number of values via a {:request, :infinity}
   message, the Subscription effectively becoming a push flow without any back pressure.
 
   A Subscription is able to deal with multiple Publisher and/or Subscriber
-  Component processes. Multiple Subscriber processes are handled in a round-robin
-  manner.
+  Component processes. Values are devlivered to multiple Subscriber processes
+  in a round-robin manner.
 
-  The design of this module is based largely on the work of the Reactive Stream
+  The design of this module borrows ideas and terminology from the Reactive Stream
   project:  http://www.reactive-streams.org/
   """
   require Logger
 
   defstruct [
     publisher_pids: [], publisher_port: nil,
-    subscriber_pids: {}, subscriber_pids_length: 0, subscriber_port: nil
+    subscriber_pids: {}, subscriber_pids_length: 0, subscriber_port: nil,
+    capacity: :infinity, count: 0
   ]
   @doc """
   The new function doesn't do much except initialize a Subscription structure
   with values for the names of the publisher and subscriber ports that this
   subscription will connect to and manage. Also see the start() function below.
+  The initial value for a subscription's capacity is set to :infinity.
   """
   def new(publisher_port, subscriber_port) do
     %ElixirFBP.Subscription{
@@ -33,17 +35,44 @@ defmodule ElixirFBP.Subscription do
       publisher_port: publisher_port,
       subscriber_pids: {},
       subscriber_pids_length: 0,
-      subscriber_port: subscriber_port
+      subscriber_port: subscriber_port,
+      capacity: :infinity,
+      count: 0
+    }
+  end
+
+  @doc """
+  The new function doesn't do much except initialize a Subscription structure
+  with values for the names of the publisher and subscriber ports that this
+  subscription will connect to and manage. Also see the start() function below.
+  An initial value for the subscription's capacity is supplied.
+  """
+  def new(publisher_port, subscriber_port, capacity) do
+    %ElixirFBP.Subscription{
+      publisher_pids: [],
+      publisher_port: publisher_port,
+      subscriber_pids: {},
+      subscriber_pids_length: 0,
+      subscriber_port: subscriber_port,
+      capacity: capacity,
+      count: 0
     }
   end
 
   @doc """
   The start function does nothing more than spawn a Subscription process. The other
   values in the Subscription structure are initialized after the Components that
-  are connected to this subscription have been started. See Component.start()
+  are connected to this subscription have been started. See Component.start();
+  it is then that we know how many subscriber and publisher processes are
+  attached to this subscription.
   """
   def start(inport, outport) do
     subscription = ElixirFBP.Subscription.new(inport, outport)
+    spawn(fn -> loop(subscription,  0) end)
+  end
+
+  def start(inport, outport, capacity) do
+    subscription = ElixirFBP.Subscription.new(inport, outport, capacity)
     spawn(fn -> loop(subscription,  0) end)
   end
 
@@ -61,7 +90,9 @@ defmodule ElixirFBP.Subscription do
               publisher_port: publisher_port,
               subscriber_pids: subscriber_pids,
               subscriber_pids_length: subscriber_pids_length,
-              subscriber_port: subscriber_port} = subscription,
+              subscriber_port: subscriber_port,
+              capacity: capacity,
+              count: count} = subscription,
               subscriber_index) do
     receive do
       # The next two messages serve to update the processor pids for
@@ -75,27 +106,35 @@ defmodule ElixirFBP.Subscription do
         new_subscription = %{subscription | :subscriber_pids => subscriber_pids,
                                             :subscriber_pids_length => tuple_size(subscriber_pids)}
         loop(new_subscription, subscriber_index)
-      # A request for data from the subscriber but with no bounds;
-      # Have the publishers send as much as they can to all the subscribers -
-      # via this subscription.
-      {:request, :infinity} ->
-        Enum.each(publisher_pids, fn(publisher_pid) ->
-          send(publisher_pid, publisher_port)
-        end)
-        loop(subscription, subscriber_index)
-      # A request for data from the subscriber, but no more than n occurrences
-      # Ask all the publishers for a data value
-      {:request, n}  when n > 0 ->
+      # Change the capacity and reset the count to zero.
+      {:request, capacity} ->
+        new_subscription = %{subscription | :capacity => capacity, :count => 0}
+        loop(new_subscription, subscriber_index)
+      # Publisher has sent data - pass it on to the next subscriber
+      {^publisher_port, value} when capacity == :infinity ->
+        send(elem(subscriber_pids, subscriber_index), {subscriber_port, value})
+        loop(subscription, rem(subscriber_index + 1, subscriber_pids_length))
+      # Publisher has sent data - pass it on to the next subscriber and count
+      # up to the current capacity.
+      {^publisher_port, value} when capacity < count ->
+        send(elem(subscriber_pids, subscriber_index), {subscriber_port, value})
+        new_subscription = %{subscription | :count => count + 1}
+        loop(new_subscription, rem(subscriber_index + 1, subscriber_pids_length))
+      # Publisher has sent data - pass it on to the subscriber, but we have
+      # reached capacity - ask for more
+      {^publisher_port, value} ->
+        send(elem(subscriber_pids, subscriber_index), {subscriber_port, value})
         Stream.cycle(publisher_pids)
-          |> Stream.take(n)
+          |> Stream.take(capacity)
           |> Enum.each(fn(publisher_pid) ->
             send(publisher_pid, publisher_port)
           end)
-        loop(subscription, subscriber_index)
-      # Publisher has sent data - pass it on to the next subscriber
-      {^publisher_port, value} ->
-        send(elem(subscriber_pids, subscriber_index), {subscriber_port, value})
-        loop(subscription, rem(subscriber_index + 1, subscriber_pids_length))
+        new_subscription = %{subscription | :count => 0}
+        loop(new_subscription, rem(subscriber_index + 1, subscriber_pids_length))
+      # Cancel this subscription - break out of the receiving loop.
+      :cancel ->
+        nil
+      # Some unknown message has been received.
       message ->
         Logger.info("Received unknown message: #{inspect message}")
         loop(subscription, subscriber_index)

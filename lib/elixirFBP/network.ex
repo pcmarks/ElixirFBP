@@ -3,14 +3,13 @@ defmodule ElixirFBP.Network do
   ElxirFBP.Network is a GenServer that provides support for starting and stopping a
   FBP network, and finding out about its state. The network keeps
   a dictionary of graphs ids, each of which points to an ElixirFBP.Graph structure.
-  Graphs are implemented as GenServers
+  Graphs are also implemented as GenServers
 
   Functions supported by this module are based on NoFlo's FBP Network Protocol,
   specifically the network sub-protocol. See http://noflojs.org/documentation/protocol/
   for the details. There is one exception: the clear graph command is implemented here.
 
-  There is a function - remove_graph - that is not part
-  of the Network Protocol.
+  There is a function - remove_graph - that is not part of the Network Protocol.
 
   This module is registered with its module name.
 
