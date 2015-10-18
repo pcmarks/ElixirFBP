@@ -10,14 +10,15 @@ This implementation is discussed [here](http://www.elixirfbp.org).
 # Description
 The Elixir implementation of the FBP runtime is based on the FBP Protocol as
 described at the NoFlo [website](http://noflojs.org/documentation/protocol/).
-Currently, the runtime can only communicate via websockets, which means that the
-noflo-ui can be used either running locally or via the on-line version at
-[app.flowhub.io](http:/app.flowhub.io).
 
-#Architecture
-Exclusive of the web socket handling (handled by the
-[Cowboy](https://hex.pm/packages/cowboy) package) the
-ElixirFBP consists of a set of Elixir modules:
+Note that an earlier release of this repository contained a runtime implementation
+that communicated, via websockets, with noflo-ui. Noflow-ui can be used either
+running locally or via the on-line version at
+[app.flowhub.io](http:/app.flowhub.io). This code was refactored out and will
+appear in another repository.
+
+# Architecture
+ElixirFBP is made up of the following Elixir modules:
 * ElixirFBP.Runtime
 * ElixirFBP.Network
 * ElixirFBP.Graph
@@ -41,12 +42,6 @@ there is one Subscription per FBP graph edge. The components correspond to the
 publisher and subscriber in the [Reactive Stream protocol](http://www.reactive-streams.org/). A Subscription can limit the number of Information Packets that can be sent from a
 publisher to a subscriber, that is, "back pressure" can be applied to the
 publisher.
-
-The [Elixir Cowboy package](https://github.com/ninenines/cowboy) provides web socket
-support for both the sending and receiving of
-frames. The module FBPNetwork.FBPHandler is used by Cowboy to parse NoFlo protocol
-messages and to call the appropriate function in the Runtime, Network, and Graph
-GenServers.
 
 # Limitations
 * The components for this runtime are hard-wired in ElixirFBP. A "discovery"
