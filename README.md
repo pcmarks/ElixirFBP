@@ -8,27 +8,19 @@ This repository will contain an implementation of Flow-based Programming in the
 This implementation is discussed [here](http://www.elixirfbp.org).
 
 # Description
-The Elixir implementation of the FBP runtime is based on the FBP Protocol as
-described at the NoFlo [website](http://noflojs.org/documentation/protocol/).
+This Elixir implementation of an FBP system is influenced by the FBP Protocol as described at the NoFlo [website](http://noflojs.org/documentation/protocol/). These modules, however, can be used without regard to any particular runtime by using the Network and Graph modules directly.
 
 Note that an earlier release of this repository contained a runtime implementation
-that communicated, via websockets, with noflo-ui. Noflow-ui can be used either
-running locally or via the on-line version at
-[app.flowhub.io](http:/app.flowhub.io). This code was refactored out and will
-appear in another repository.
+that communicated, via websockets, with a noflo-ui client. The client could be running locally or remotely, using the on-line version at
+[app.flowhub.io](http:/app.flowhub.io). This code was refactored out and will appear in another repository.
 
 # Architecture
 ElixirFBP is made up of the following Elixir modules:
-* ElixirFBP.Runtime
 * ElixirFBP.Network
 * ElixirFBP.Graph
 * ElixirFBP.Subscription
 
-The first three modules are implemented as Elixir [GenServers](http://elixir-lang.org/docs/stable/elixir/GenServer.html)
-
-ElixirFBP.Runtime is responsible for communicating with a client who understands
-the FBP network protocol and for keeping track of the graph that is being built/run.
-It knows how to handle FBP protocol runtime commands.
+The first two modules are implemented as Elixir [GenServers](http://elixir-lang.org/docs/stable/elixir/GenServer.html)
 
 ElixirFBP.Network
 keeps track of the FBP network that is currently being built and/or run. It
