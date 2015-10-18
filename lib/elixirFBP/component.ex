@@ -45,6 +45,7 @@ defmodule ElixirFBP.Component do
         send(subscription, {:subscriber_pids, List.to_tuple(component_pids)})
       {port, initial_value} ->
     end)
+    component_pids
   end
 
   @doc """

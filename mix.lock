@@ -1,7 +1,7 @@
 %{"cowboy": {:hex, :cowboy, "1.0.0"},
   "cowlib": {:hex, :cowlib, "1.0.1"},
   "earmark": {:hex, :earmark, "0.1.17"},
-  "ex_doc": {:git, "git://github.com/elixir-lang/ex_doc.git", "18d9b9c101c2848e607aa4494414c2da11f8cab3", []},
+  "ex_doc": {:git, "https://github.com/elixir-lang/ex_doc.git", "63342194e8a572485b37b4a58668f9b43ab7ab26", []},
   "hackney": {:hex, :hackney, "1.1.0"},
   "httpoison": {:hex, :httpoison, "0.6.2"},
   "idna": {:hex, :idna, "1.0.2"},

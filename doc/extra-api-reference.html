@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>API Reference – ElixirFBP v0.0.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.10.1-dev">
+    <link rel="stylesheet" href="dist/app.css" />
+    <script src="dist/sidebar_items.js"></script>
+  </head>
+  <body data-type="extras">
+
+<div class="main">
+<button class="sidebar-toggle">
+  <i class="icon-menu"></i>
+</button>
+<section class="sidebar">
+  <button class="sidebar-toggle">
+    <i class="icon-menu"></i>
+  </button>
+
+  
+  <a href="extra-api-reference.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        ElixirFBP
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.0.1
+      </h2>
+    </div>
+    
+  </a>
+
+  <div class="sidebar-search">
+    <i class="icon-search"></i>
+    <input type="text" class="sidebar-searchInput" placeholder="search" autocomplete="off" />
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+
+    
+  </ul>
+
+  <ul id="full-list" class="sidebar-fullList"></ul>
+  <div class="sidebar-noResults"></div>
+</section>
+
+<section class="content">
+  <div id="content" class="content-inner">
+
+  <h1>API Reference</h1>
+
+  <ul class="summary-links">
+    
+      <li><a href="#modules">Modules</a></li>
+    
+    
+    
+  </ul>
+
+  
+    <section id="modules" class="details-list">
+      <h1 class="section-heading">Modules</h1>
+      <div class="summary">
+        <div class="summary-row">
+  <div class="summary-signature"><a href="ElixirFBP.html">ElixirFBP</a></div>
+  
+    <div class="summary-synopsis"><p>ElixirFBP is an implementation of the flow-based programming (FBP) technique.
+An FBP program is represented by a directed graph where the nodes are
+components that can receive Information Packets (IPs) via in ports and send
+IPs - typically after some computation - out the out ports</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="ElixirFBP.Behaviour.html">ElixirFBP.Behaviour</a></div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="ElixirFBP.Component.html">ElixirFBP.Component</a></div>
+  
+    <div class="summary-synopsis"><p>Component is used to start an FBP component. It takes the component’s name -
+an Elixir module name - and spawns a process. It is assumed that the component
+module supports a loop function which will be called once the component is
+spawned</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="ElixirFBP.ComponentLoader.html">ElixirFBP.ComponentLoader</a></div>
+  
+    <div class="summary-synopsis"><p>This module is responsible for loading ElixirFBP components at run time. Given
+a list of file paths, it will examine all modules, select those which implement
+the ElixirFBP.ComponentBehaviour and develop a list of Component attributes
+such as description, inports, and outports</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="ElixirFBP.Graph.html">ElixirFBP.Graph</a></div>
+  
+    <div class="summary-synopsis"><p>ElxirFBP.Graph is a GenServer that provides support for the creation and
+maintainance of an FBP Graph</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="ElixirFBP.InitialInformationPacket.html">ElixirFBP.InitialInformationPacket</a></div>
+  
+    <div class="summary-synopsis"><p>A special component that can deliver a constant anytime it is sent
+a :value message</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="ElixirFBP.Network.html">ElixirFBP.Network</a></div>
+  
+    <div class="summary-synopsis"><p>ElxirFBP.Network is a GenServer that provides support for starting and stopping a
+FBP network, and finding out about its state. The network keeps
+a dictionary of graphs ids, each of which points to an ElixirFBP.Graph structure.
+Graphs are also implemented as GenServers</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="ElixirFBP.Runtime.html">ElixirFBP.Runtime</a></div>
+  
+    <div class="summary-synopsis"><p>ElixirFBP.Runtime is a GenServer responsible for information related to the
+runtime capabilites of a particular instance of ElixirFBP. In its structure,
+it stores descriptive data, a list of capabilities and a list of components
+that may be used to construct FBP programs</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature"><a href="ElixirFBP.Subscription.html">ElixirFBP.Subscription</a></div>
+  
+    <div class="summary-synopsis"><p>A Subscription serves as a conduit and a control mechanism for the delivery of
+data from Publishers (Components) to Subscribers (Components). A Subscriber
+must specify how many IPs it is willing to receive via a {:request, n} message
+where n is some integer or the atom :infinity. The Subscription will ensure that
+no more IPs than have been asked for will be sent</p>
+</div>
+  
+</div>
+
+      </div>
+    </section>
+  
+
+  
+
+  
+    <footer class="footer">
+      <p>
+        <span class="line">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.10.1-dev),
+        </span>
+        <span class="line">
+          designed by
+          <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+      </p>
+    </footer>
+  </div>
+</section>
+</div>
+    <script src="dist/app.js"></script>
+  </body>
+</html>
+

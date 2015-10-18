@@ -98,7 +98,7 @@ defmodule ElixirFBP.Subscription do
       # The next two messages serve to update the processor pids for
       # the publisher and subscriber components. Notice that the publisher pids
       # are in a List while the subscriber pids are in a tuple. We use a tuple
-      # so that we can efficiently send a value to nth subscriber process
+      # so that we can efficiently send a value to the nth subscriber process
       {:publisher_pids, publisher_pids} ->
         new_subscription = %{subscription | :publisher_pids => publisher_pids}
         loop(new_subscription, subscriber_index)
@@ -106,13 +106,39 @@ defmodule ElixirFBP.Subscription do
         new_subscription = %{subscription | :subscriber_pids => subscriber_pids,
                                             :subscriber_pids_length => tuple_size(subscriber_pids)}
         loop(new_subscription, subscriber_index)
-      # Change the capacity and reset the count to zero.
+      # Ask the publisher for capacity many values. Used during the starting
+      # of a graph in the pull run mode.
+      :request when is_integer(capacity) ->
+        new_subscription = %{subscription |
+        :count => 0}
+        Stream.cycle(publisher_pids)    # Cycle limited by capacity
+          |> Stream.take(capacity)
+          |> Enum.each(fn(publisher_pid) ->
+            send(publisher_pid, publisher_port)
+          end)
+        loop(new_subscription, subscriber_index)
+      :request when capacity == :infinity->
+        new_subscription = %{subscription | :count => 0}
+        Enum.each(publisher_pids, fn(publisher_pid) ->
+          # IO.puts("sending publisher_port #{inspect publisher_port} publisher_pid #{inspect publisher_pid}")
+          send(publisher_pid, publisher_port)
+        end)
+        loop(new_subscription, subscriber_index)
+      # Change the capacity and reset the count to zero. And finally ask The
+      # publisher for data
       {:request, capacity} ->
         new_subscription = %{subscription | :capacity => capacity, :count => 0}
+        Stream.cycle(publisher_pids)    # Cycle limited by capacity
+          |> Stream.take(capacity)
+          |> Enum.each(fn(publisher_pid) ->
+            send(publisher_pid, publisher_port)
+          end)
         loop(new_subscription, subscriber_index)
       # Publisher has sent data - pass it on to the next subscriber
       {^publisher_port, value} when capacity == :infinity ->
-        send(elem(subscriber_pids, subscriber_index), {subscriber_port, value})
+        subscriber_pid = elem(subscriber_pids, subscriber_index)
+        message = {subscriber_port, value}
+        send(subscriber_pid, message)
         loop(subscription, rem(subscriber_index + 1, subscriber_pids_length))
       # Publisher has sent data - pass it on to the next subscriber and count
       # up to the current capacity.
@@ -124,7 +150,7 @@ defmodule ElixirFBP.Subscription do
       # reached capacity - ask for more
       {^publisher_port, value} ->
         send(elem(subscriber_pids, subscriber_index), {subscriber_port, value})
-        Stream.cycle(publisher_pids)
+        Stream.cycle(publisher_pids)    # cycle limited by capacity
           |> Stream.take(capacity)
           |> Enum.each(fn(publisher_pid) ->
             send(publisher_pid, publisher_port)

@@ -1,14 +1,20 @@
 defmodule ElixirFBP.InitialInformationPacket do
   @moduledoc """
-  A special component that can deliver a constant
+  A special component that can deliver a constant anytime it is sent
+  a :value message.
   """
-  def inports, do: []
-  def outports, do: [:value, :any]
-  def loop(_inports, outports) do
-    %{:value => value} = outports
+  @behaviour ElixirFBP.Behaviour
+
+  def description, do: "An Initial Information Packet producer"
+  def inports, do: [constant: :any]
+  def outports, do: [value: :any]
+
+  def loop(inports, outports) do
+    %{:constant => value} = inports
     receive do
-      {:value, subscription_pid} ->
-        send(subscription_pid, {:value, value})
+      :value ->
+        send(outports[:value], {:value, value})
+      loop(inports, outports)
     end
   end
 end

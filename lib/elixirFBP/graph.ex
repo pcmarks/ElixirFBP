@@ -80,10 +80,10 @@ defmodule ElixirFBP.Graph do
 
   @doc """
   Start the execution of the components in this graph. Optionally supplying
-  a pull count (integer or :infinity (default))
+  a run mode of :pull or :push (default)
   """
-  def start(fbp_graph_reg_name, pull_count \\ :infinity) do
-    GenServer.call(fbp_graph_reg_name, {:start, pull_count})
+  def start(fbp_graph_reg_name, run_mode \\ :push) do
+    GenServer.call(fbp_graph_reg_name, {:start, run_mode})
   end
 
   @doc """
@@ -127,6 +127,13 @@ defmodule ElixirFBP.Graph do
   """
   def edges(fbp_graph_reg_name) do
     GenServer.call(fbp_graph_reg_name, :edges)
+  end
+
+  @doc """
+  Return the edges attached to a node
+  """
+  def edges(fbp_graph_reg_name, node_id) do
+    GenServer.call(fbp_graph_reg_name, {:edges, node_id})
   end
 
   @doc """
@@ -274,10 +281,11 @@ defmodule ElixirFBP.Graph do
     2. For every edge in the graph, create and spawn a Subscription
     3. For every node in the graph, assemble the inports and outport values
        for a Component and then spawn the Component's process(es)
-    4. Send each Subscription a pull request to get the flow of IPs going.
+    4. Choose the method to begin execution based on the run_mode - either
+       :push or :pull mode.
 
   """
-  def handle_call({:start, pull_count}, _req, fbp_graph) do
+  def handle_call({:start, run_mode}, _req, fbp_graph) do
     nodes = :digraph.vertices(fbp_graph.graph)
     edges = :digraph.edges(fbp_graph.graph)
     # Verify that all out ports on all the nodes are connected to something
@@ -321,14 +329,38 @@ defmodule ElixirFBP.Graph do
             {outport, subscription_pid}
           end) |> Enum.into(%{})
           # IO.puts("Component.start: #{component},#{node_id},#{inspect inps},#{inspect outps}")
-          ElixirFBP.Component.start(component, node_id, inps, outps)
+          component_pids = ElixirFBP.Component.start(component, node_id, inps, outps)
+          new_label = %{label | :component_pids => component_pids}
+          :digraph.add_vertex(fbp_graph.graph, node_id, new_label)
         end)
-        # Send every Subscription a request to get the flow started.
-        Enum.each(edges, fn(edge) ->
-          {_edge_id, _node_in, _node_out, label} = :digraph.edge(fbp_graph.graph, edge)
-          %{subscription_pid: subscription_pid} = label
-          send(subscription_pid, {:request, pull_count})
-        end)
+        # Get things started conditioned on whether this graph is to run
+        # in a push or pull mode
+        case run_mode do
+          :push ->
+            # Find all of the initial information packet components and make
+            # each of them send an information packet to their respective subscribers
+            Enum.each(nodes, fn(node) ->
+              {_vertex,
+                %{component: component,
+                  component_pids: component_pids} = label} = :digraph.vertex(fbp_graph.graph, node)
+              if component == "ElixirFBP.InitialInformationPacket" do
+                Enum.each(component_pids, fn(component_pid) ->
+                  send(component_pid, :value)
+                end)
+              end
+            end)
+          :pull ->
+            # For all of the subscriptions, send them a request message. request
+            # capacity values from the subscription's publisher.
+            Enum.each(edges, fn(edge) ->
+              {_edge_id, _node_in, _node_out, label} =
+                    :digraph.edge(fbp_graph.graph, edge)
+              %{subscription_pid: subscription_pid} = label
+              send(subscription_pid, :request)
+            end)
+          _ ->
+            nil
+        end
         new_fbp_graph = %ElixirFBP.Graph{fbp_graph | started: true, running: true}
         {:reply, :ok, new_fbp_graph}
       _ ->
@@ -379,6 +411,21 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
+  Callback implementation for ElixirFBP.Graph.edges(node_id)
+  Return the edges for a given node
+  """
+  def handle_call({:edges, node_id}, _req, fbp_graph) do
+    out_edges = :digraph.out_edges(fbp_graph.graph, node_id)
+    in_edges = :digraph.in_edges(fbp_graph.graph, node_id)
+    edges = Enum.map(out_edges ++ in_edges, fn(edge) ->
+      {_edge_id, _node_in, _node_out, label} =
+            :digraph.edge(fbp_graph.graph, edge)
+      %{subscription_pid: subscription_pid} = label
+    end)
+    {:reply, :ok, fbp_graph}
+  end
+
+  @doc """
   Callback implementation for ElixirFBP.Graph.add_node()
   """
   def handle_call({:add_node, node_id, component, metadata}, _req, fbp_graph) do
@@ -393,6 +440,7 @@ defmodule ElixirFBP.Graph do
       {elem(outport,0), nil}
       end)
     label = %{component: component,
+              component_pids: [],
               inports: inports, inport_types: component_inports,
               outports: outports, outport_types: component_outports,
               metadata: metadata}
@@ -502,24 +550,32 @@ defmodule ElixirFBP.Graph do
   end
 
   @doc """
-  Callback implementation for ElixirFBP.Graph.add_initial()
+  Callback implementation for ElixirFBP.Graph.add_initial(). We create a node
+  using the distinguished component named InitialInformationPacket. This node
+  is preloaded with the initial value. We also add an edge from the given node
+  (node_id) to this initial component node. The edge will later be the basis
+  for spawning a Subscription.
   """
   def handle_call({:add_initial, data, node_id, port, _metadata}, _req, fbp_graph) do
-    {node_id, label} = :digraph.vertex(fbp_graph.graph, node_id)
-    inports = label.inports
-    inport_types = label.inport_types
-    message = case convert_to_type(inport_types[port], data) do
-      {:error, what} ->
-        payload = %{"message" => "#{what}: #{inspect data}"}
-        %{"protocol" => "network", "command" => "error",
-                  "payload" => payload }
-      initial_value ->
-        new_inports = Keyword.put(inports, port, initial_value)
-        new_label = %{label | :inports => new_inports}
-        :digraph.add_vertex(fbp_graph.graph, node_id, new_label)
-        initial_value
-    end
-    {:reply, message, fbp_graph}
+    inports = [constant: data]
+    outports = [value: :any]
+    label = %{component: "ElixirFBP.InitialInformationPacket",
+              component_pids: [],
+              inports: inports, inport_types: [:any], metadata: %{:number_of_processes => 1},
+              outports: outports, outport_types: []}
+    iip_node_id = node_id <> "_" <> Atom.to_string(port)
+    iip_node = :digraph.add_vertex(fbp_graph.graph, iip_node_id, label)
+    # Now construct an edge between this IIP node and the node that will be
+    # initialized - designated by node_id
+    edge_label =  %{src_port: :value,
+                    tgt_port: port,
+                    subscription_pid: nil}
+    new_edge = :digraph.add_edge(
+                    fbp_graph.graph,
+                    iip_node_id,
+                    node_id,
+                    edge_label)
+    {:reply, iip_node, fbp_graph}
   end
 
   @doc """

@@ -31,6 +31,7 @@ defmodule ElixirFBP.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    [{:earmark, "~> 0.1"},
+     {:ex_doc, github: "elixir-lang/ex_doc"}]
   end
 end

@@ -19,6 +19,7 @@ defmodule Math.Add do
         loop(inports, outports)
       :sum when is_number(addend) and is_number(augend) ->
         send(outports[:sum], {:sum, addend + augend})
+        inports = %{inports | :addend => nil, :augend => nil}
         loop(inports, outports)
     end
   end

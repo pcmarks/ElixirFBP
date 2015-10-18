@@ -67,11 +67,11 @@ defmodule ElixirFBP.Network do
   end
 
   @doc """
-  Start execution of a graph, optionally specifing the pull count (integer or
-  :infinity(default))
+  Start execution of a graph, optionally specifing whether it is to
+  run in either :pull or :push (default) mode.
   """
-  def start(graph_id, pull_count \\ :infinity) do
-    GenServer.call(__MODULE__, {:start, graph_id, pull_count})
+  def start(graph_id, run_mode \\ :push) do
+    GenServer.call(__MODULE__, {:start, graph_id, run_mode})
   end
 
   @doc """
@@ -118,17 +118,8 @@ defmodule ElixirFBP.Network do
   not been started and registered, do so.
   """
   def handle_call({:clear, graph_id, parameters}, _req, network) do
-    registered_name = HashDict.get(network.graph_reg_names, graph_id)
-    if is_nil(registered_name) do
-      {:ok, registered_name} = Graph.start_link(graph_id, parameters)
-      new_graph_reg_names =
-        HashDict.put(network.graph_reg_names, graph_id, registered_name)
-      {:reply, {:ok, registered_name},
-             %ElixirFBP.Network{network | graph_reg_names: new_graph_reg_names}}
-    else
-      Graph.set_parameters(registered_name, parameters)
-      {:reply, {:ok, registered_name}, network}
-    end
+    HashDict.get(network.graph_reg_names, graph_id)
+    |> handle_call_clear(graph_id, parameters, network)
   end
 
   @doc """
@@ -158,12 +149,12 @@ defmodule ElixirFBP.Network do
   @doc """
   Callback implementation for ElixirFBP.Network.start()
   """
-  def handle_call({:start, graph_id, pull_count}, _req, network) do
+  def handle_call({:start, graph_id, run_mode}, _req, network) do
     reg_name = HashDict.get(network.graph_reg_names, graph_id)
     if ! reg_name do
       {:reply, {:error, "Graph does not exist"}, network}
     else
-      case Graph.start(reg_name, pull_count) do
+      case Graph.start(reg_name, run_mode) do
         {:ok} ->
           {:reply, :ok, network}
         error ->
@@ -216,4 +207,18 @@ defmodule ElixirFBP.Network do
     end)
     :ok
   end
+
+  defp handle_call_clear(nil, graph_id, parameters, network) do
+    {:ok, registered_name} = Graph.start_link(graph_id, parameters)
+    new_graph_reg_names =
+      HashDict.put(network.graph_reg_names, graph_id, registered_name)
+    {:reply, {:ok, registered_name},
+           %ElixirFBP.Network{network | graph_reg_names: new_graph_reg_names}}
+  end
+
+  defp handle_call_clear(registered_name, _graph_id, parameters, network) do
+    Graph.set_parameters(registered_name, parameters)
+    {:reply, {:ok, registered_name}, network}
+  end
+
 end
