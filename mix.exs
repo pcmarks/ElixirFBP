@@ -17,7 +17,7 @@ defmodule ElixirFBP.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [],
+    [applications: [:logger],
      registered: [ElixirFBP.Network, ElixirFBP.Graph]]
   end
 

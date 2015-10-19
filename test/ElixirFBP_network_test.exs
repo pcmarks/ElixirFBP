@@ -22,7 +22,7 @@ defmodule ElixirFBPNetworkTest do
     assert :ok == Network.stop
   end
 
-  test "Start an ElxirFBP Network" do
+  test "Create and start an ElxirFBP Graph" do
     Network.start_link
     {:ok, fbp_graph} = Network.clear(@graph_1)
     Graph.add_node(fbp_graph, @node_1, "Math.Add")

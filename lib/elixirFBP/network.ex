@@ -33,7 +33,10 @@ defmodule ElixirFBP.Network do
   Starts things off with the creation of the empty state.
   """
   def start_link do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+    case GenServer.start_link(__MODULE__, [], name: __MODULE__) do
+      {:ok, pid} -> pid
+      {:error, {:already_started, pid}} -> pid
+    end
   end
 
   @doc """
