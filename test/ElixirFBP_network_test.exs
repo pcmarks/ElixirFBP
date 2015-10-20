@@ -1,7 +1,11 @@
 defmodule ElixirFBPNetworkTest do
+
   use ExUnit.Case, async: false
+
   alias ElixirFBP.Graph
   alias ElixirFBP.Network
+
+  import ExUnit.CaptureLog
 
   @graph_1      "graph_1"
   @node_1       "node_1"
@@ -22,11 +26,11 @@ defmodule ElixirFBPNetworkTest do
     assert :ok == Network.stop
   end
 
-  test "Create and start an ElxirFBP Graph" do
+  test "Create and start an ElxirFBP Graph with defaults (push mode)" do
     Network.start_link
     {:ok, fbp_graph} = Network.clear(@graph_1)
     Graph.add_node(fbp_graph, @node_1, "Math.Add")
-    Graph.add_node(fbp_graph, @node_2, "Core.Output")
+    Graph.add_node(fbp_graph, @node_2, "Core.Log")
     _edge = Graph.add_edge(
                   fbp_graph,
                   @node_1, :sum,
@@ -34,15 +38,14 @@ defmodule ElixirFBPNetworkTest do
 
     Graph.add_initial(fbp_graph, 42, @node_1, :addend)
     Graph.add_initial(fbp_graph, 24, @node_1, :augend)
-    Network.start(@graph_1)
-    status = Network.get_status(@graph_1)
-    assert status == {true, true}
-    # Sleep a little while to make sure the computation is finished
-    :timer.sleep(10)
-    # # Make sure the graph and network are stopped
+    assert capture_log(fn ->
+      Network.start(@graph_1)
+      # Need a slight delay to allow for the log message to shou up
+      :timer.sleep(5)
+    end) =~ "66"
+    {true, true} = Network.get_status(@graph_1)
+    # Make sure the graph and network are stopped
     Network.stop(@graph_1)
-    # # kill the network process
-    assert :ok == Network.stop
   end
 
 end
