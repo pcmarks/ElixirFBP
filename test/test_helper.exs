@@ -4,6 +4,8 @@ ExUnit.start(trace: true)
 
 defmodule Core.Log do
 
+  @behaviour ElixirFBP.Behaviour
+
     require Logger
 
     def description, do: "Log the IP"
@@ -20,6 +22,8 @@ defmodule Core.Log do
 end
 
 defmodule Core.Output do
+
+  @behaviour ElixirFBP.Behaviour
 
     def description, do: "Show the IP on the console"
     def inports, do: [in_port: :string]

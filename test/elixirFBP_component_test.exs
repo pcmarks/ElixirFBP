@@ -21,7 +21,7 @@ defmodule ElixirFBPComponentTest do
                   @node_1, :sum,
                   @node_2, :addend)
     {_node_id, label} = Graph.get_node(fbp_graph_reg_name, @node_1)
-    fbp_graph = Graph.get(fbp_graph_reg_name)
+    Graph.get(fbp_graph_reg_name)
     Component.stop(fbp_graph_reg_name, @node_1, label)
     Network.stop(@graph_1)
     Network.stop

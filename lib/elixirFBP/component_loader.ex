@@ -31,10 +31,10 @@ defmodule ElixirFBP.ComponentLoader do
       outports = module.outports()
       description = module.description()
       name = to_string(module)
-      ips = Enum.map(inports, fn({id, type} = inport) ->
+      ips = Enum.map(inports, fn({id, type} = _inport) ->
         %{"id" => to_string(id), "type" => to_string(type)}
       end)
-      ops = Enum.map(outports, fn({id, type} = outport) ->
+      ops = Enum.map(outports, fn({id, type} = _outport) ->
         %{"id" => to_string(id), "type" => to_string(type)}
       end)
       %{"name" => name, "description" => description,

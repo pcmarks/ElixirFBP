@@ -94,7 +94,7 @@ defmodule ElixirFBPGraphTest do
   test "Rename a node" do
     {:ok, fbp_graph_reg_name} = Graph.start_link(@graph_1)
     Graph.add_node(fbp_graph_reg_name, @node_1, "Math.Add")
-    result = Graph.rename_node(fbp_graph_reg_name, @node_1, "new_name", "secret")
+    Graph.rename_node(fbp_graph_reg_name, @node_1, "new_name", "secret")
     fbp_graph = Graph.get(fbp_graph_reg_name)
     {node_id, _label} = :digraph.vertex(fbp_graph.graph, "new_name")
     assert node_id == "new_name"
